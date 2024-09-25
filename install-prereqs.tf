@@ -123,11 +123,6 @@ resource "helm_release" "otel_collector" {
   }
 
   set {
-    name = "config.exporters.jaeger.endpoint"
-    value = "http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces"
-  }
-
-  set {
     name = "config.service.pipelines.logs.exporters"
     value = "{otlp}"
   }
