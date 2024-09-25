@@ -129,46 +129,46 @@ resource "helm_release" "otel_collector" {
 
   set {
     name = "config.service.pipelines.logs.exporters"
-    value = "[otlp]"
+    value = "{otlp}"
   }
 
   set {
     name = "config.service.pipelines.logs.processors"
-    value = "[batch]"
+    value = "{batch}"
   }
 
   set {
     name = "config.service.pipelines.logs.receivers"
-    value = "[otlp]"
+    value = "{otlp}"
   }
 
   set {
     name = "config.service.pipelines.metrics.exporters"
-    value = "[otlp]"
+    value = "{otlp}"
   }
 
   set {
     name = "config.service.pipelines.metrics.processors"
-    value = "[batch]"
+    value = "{batch}"
   }
 
   set {
     name = "config.service.pipelines.metrics.receivers"
-    value = "[otlp]"
+    value = "{otlp}"
   }
 
   set {
     name = "config.service.pipelines.traces.exporters"
-    value = "[otlp]"
+    value = "{otlp}"
   }
 
   set {
     name = "config.service.pipelines.traces.processors"
-    value = "[batch]"
+    value = "{batch}"
   }
 
   set {
     name = "config.service.pipelines.traces.receivers"
-    value = "[jaeger]"
+    value = "{jaeger}"
   }
 }
