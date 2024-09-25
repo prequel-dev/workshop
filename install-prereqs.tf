@@ -62,7 +62,10 @@ resource "helm_release" "jaeger" {
 resource "helm_release" "otel_collector" {
   name       = "otel-collector"
   namespace  = "monitoring"
-  chart      = "open-telemetry/opentelemetry-collector"
+  create_namespace = true
+
+  repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  chart      = "opentelemetry-collector"
 
   set {
     name = "image.repository"
