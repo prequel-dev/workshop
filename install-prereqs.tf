@@ -143,6 +143,6 @@ resource "helm_release" "otel_collector" {
 
   set {
     name = "config.service.pipelines.traces.receivers"
-    value = "otlp,jaeger"
+    value = "jaeger"
   }
 }
