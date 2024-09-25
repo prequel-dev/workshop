@@ -6,6 +6,10 @@
 
 ## Setup
 
+* Install `gh`
+
+* https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+
 * Helm repo setup
 
 ```
