@@ -1,10 +1,6 @@
-locals {
-  namespace = "cert-manager"
-}
-
 provider "helm" {
   kubernetes {
-    config_path = "~/.kube/config"
+    config_path = "~/.kubeconfig"
   }
 }
 
@@ -14,15 +10,9 @@ provider "kubernetes" {
 
 ### Cert Manager
 
-resource "kubernetes_namespace" "cert_manager" {
-  metadata {
-    name = local.namespace
-  }
-}
-
 resource "helm_release" "cert_manager" {
   name       = "cert-manager"
-  namespace  = local.namespace
+  namespace  = "cert-manager"
   create_namespace = true
 
   repository = "https://charts.jetstack.io"
@@ -31,6 +21,38 @@ resource "helm_release" "cert_manager" {
 
   set {
     name  = "installCRDs"
+    value = "true"
+  }
+}
+
+### Prometheus
+
+resource "helm_release" "prometheus" {
+  name       = "prometheus"
+  namespace  = "monitoring"
+  create_namespace = true
+
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "kube-prometheus-stack"
+
+  set {
+    name  = "server.persistentVolume.size"
+    value = "8Gi"
+  }
+}
+
+### Jaeger
+
+resource "helm_release" "jaeger" {
+  name       = "jaeger"
+  namespace  = "monitoring"
+  create_namespace = true
+
+  repository = "https://jaegertracing.github.io/helm-charts"
+  chart      = "jaeger"
+
+  set {
+    name  = "ingress.enabled"
     value = "true"
   }
 }
