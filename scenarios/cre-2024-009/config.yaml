@@ -1,0 +1,50 @@
+resources:
+  limits:
+    memory: "500Mi"
+  requests:
+    memory: "500Mi"
+
+config:
+  extensions:
+    zpages:
+      endpoint: localhost:55679
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: localhost:4317
+        http:
+          endpoint: localhost:4318
+    jaeger:
+      protocols:
+        thrift_http:
+          endpoint: localhost:14268
+  processors:
+    batch: {}
+  exporters:
+    otlp:
+      endpoint: localhost:4319
+  service:
+    pipelines:
+      logs:
+        exporters:
+        - otlp
+        processors:
+        - batch
+        receivers:
+        - otlp
+      metrics:
+        exporters:
+        - otlp
+        processors:
+        - batch
+        receivers:
+        - otlp
+      traces:
+        exporters:
+        - otlp
+        processors:
+        - batch
+        receivers:
+        - otlp
+        - jaeger
