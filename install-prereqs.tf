@@ -36,29 +36,8 @@ resource "helm_release" "prometheus" {
   chart      = "kube-prometheus-stack"
 
   set {
-    name = "grafana.env.GF_DIAGNOSTICS_PROFILING_ENABLED"
-    value = "false"
-  }
-
-  set {
     name  = "server.persistentVolume.size"
     value = "8Gi"
-  }
-}
-
-### Jaeger
-
-resource "helm_release" "jaeger" {
-  name       = "jaeger"
-  namespace  = "monitoring"
-  create_namespace = true
-
-  repository = "https://jaegertracing.github.io/helm-charts"
-  chart      = "jaeger"
-
-  set {
-    name  = "ingress.enabled"
-    value = "true"
   }
 }
 
