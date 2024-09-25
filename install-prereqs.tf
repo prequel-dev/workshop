@@ -36,6 +36,11 @@ resource "helm_release" "prometheus" {
   chart      = "kube-prometheus-stack"
 
   set {
+    name = "grafana.env[0].GF_DIAGNOSTICS_PROFILING_ENABLED"
+    value = "false"
+  }
+
+  set {
     name  = "server.persistentVolume.size"
     value = "8Gi"
   }
@@ -68,6 +73,16 @@ resource "helm_release" "otel_collector" {
   chart      = "opentelemetry-collector"
 
   set {
+    name = "resources.limits.memory"
+    value = "500Mi"
+  }
+
+  set {
+    name = "resources.requests.memory"
+    value = "500Mi"
+  }
+
+  set {
     name = "image.repository"
     value = "otel/opentelemetry-collector-k8s"
   }
@@ -77,60 +92,78 @@ resource "helm_release" "otel_collector" {
     value = "deployment"
   }
 
-  values = [
-    <<EOF
-resources:
-  limits:
-    memory: "500Mi"
-  requests:
-    memory: "500Mi"
+  set {
+    name = "config.extensions.zpages.endpoint"
+    value = "localhost:55679"
+  }
 
-config:
-  extensions:
-    zpages:
-      endpoint: "localhost:55679"
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: "localhost:4317"
-        http:
-          endpoint: "localhost:4318"
-    jaeger:
-      protocols:
-        thrift_http:
-          endpoint: "localhost:14268"
-  processors:
-    batch: {}
-  exporters:
-    otlp:
-      endpoint: "localhost:4319"
-    jaeger:
-      endpoint: http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces
-  service:
-    pipelines:
-      logs:
-        exporters:
-        - otlp
-        processors:
-        - batch
-        receivers:
-        - otlp
-      metrics:
-        exporters:
-        - otlp
-        processors:
-        - batch
-        receivers:
-        - otlp
-      traces:
-        exporters:
-        - otlp
-        processors:
-        - batch
-        receivers:
-        - otlp
-        - jaeger
-EOF
-  ]
+  set {
+    name = "config.receivers.otlp.protocols.grpc.endpoint"
+    value = "localhost:4317"
+  }
+
+  set {
+    name = "config.receivers.otlp.protocols.http.endpoint"
+    value = "localhost:4318"
+  }
+
+  set {
+    name = "config.receivers.jaeger.protocols.thrift_http.endpoint"
+    value = "localhost:14268"
+  }
+
+  set {
+    name = "config.exporters.otlp.endpoint"
+    value = "localhost:4319"
+  }
+
+  set {
+    name = "config.exporters.jaeger.endpoint"
+    value = "http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces"
+  }
+
+  set {
+    name = "config.service.pipelines.logs.exporters"
+    value = "otlp"
+  }
+
+  set {
+    name = "config.service.pipelines.logs.processors"
+    value = "batch"
+  }
+
+  set {
+    name = "config.service.pipelines.logs.receivers"
+    value = "otlp"
+  }
+
+  set {
+    name = "config.service.pipelines.metrics.exporters"
+    value = "otlp"
+  }
+
+  set {
+    name = "config.service.pipelines.metrics.processors"
+    value = "batch"
+  }
+
+  set {
+    name = "config.service.pipelines.metrics.receivers"
+    value = "otlp"
+  }
+
+  set {
+    name = "config.service.pipelines.traces.exporters"
+    value = "otlp"
+  }
+
+  set {
+    name = "config.service.pipelines.traces.processors"
+    value = "batch"
+  }
+
+  set {
+    name = "config.service.pipelines.traces.receivers"
+    value = "otlp,jaeger"
+  }
 }
