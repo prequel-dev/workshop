@@ -36,7 +36,7 @@ resource "helm_release" "prometheus" {
   chart      = "kube-prometheus-stack"
 
   set {
-    name = "grafana.env[0].GF_DIAGNOSTICS_PROFILING_ENABLED"
+    name = "grafana.env.GF_DIAGNOSTICS_PROFILING_ENABLED"
     value = "false"
   }
 
