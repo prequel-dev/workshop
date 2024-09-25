@@ -93,6 +93,11 @@ resource "helm_release" "otel_collector" {
   }
 
   set {
+    name = "service.internalTrafficPolicy"
+    value = "Local"
+  }
+
+  set {
     name = "config.extensions.zpages.endpoint"
     value = "localhost:55679"
   }
