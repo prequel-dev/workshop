@@ -170,7 +170,7 @@ resource "helm_release" "otel_collector" {
 
 ### Strimzi Kafka Cluster Operator
 
-resource "helm_release" "kafka" {
+resource "helm_release" "kafka_operator" {
   name       = "my-kafka"
   namespace  = "strimzi"
   create_namespace = true
@@ -181,7 +181,7 @@ resource "helm_release" "kafka" {
 
 ### RabbitMQ Cluster Operator
 
-resource "helm_release" "kafka" {
+resource "helm_release" "rabbitmq_operator" {
   name       = "my-rabbitmq"
   namespace  = "rabbitmq"
   create_namespace = true
