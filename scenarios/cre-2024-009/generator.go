@@ -70,8 +70,8 @@ func generateTraces(numTraces int, workerID int, wg *sync.WaitGroup) {
 		span.SetAttributes(attribute.Int("iteration", i))
 
 		// Add lots of large tag strings to the span
-		for j := 0; j < 100; j++ { // Number of attributes to add (adjust as needed)
-			largeString := generateLargeString(1024) // Size of each attribute value in bytes
+		for j := 0; j < 1000; j++ { // Number of attributes to add (adjust as needed)
+			largeString := generateLargeString(1024*10) // Size of each attribute value in bytes
 			span.SetAttributes(attribute.String(fmt.Sprintf("large_attribute_%d", j), largeString))
 		}
 
@@ -82,9 +82,6 @@ func generateTraces(numTraces int, workerID int, wg *sync.WaitGroup) {
 
 		// End parent span
 		span.End()
-
-		// Simulate some work
-		time.Sleep(1 * time.Millisecond) // Adjust the sleep time as needed
 	}
 }
 
@@ -97,7 +94,7 @@ func main() {
 	defer shutdown()
 
 	// Number of goroutines (workers) and traces per worker
-	numWorkers := 8                   // Adjust the number of workers as needed
+	numWorkers := 4
 	tracesPerWorker := 100 //2500           // Adjust the number of traces per worker
 	totalTraces := numWorkers * tracesPerWorker
 

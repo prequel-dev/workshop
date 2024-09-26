@@ -23,7 +23,11 @@ config:
     batch: {}
   exporters:
     otlp:
-      endpoint: localhost:4319
+      endpoint: localhost:9999
+    debug:
+      verbosity: detailed
+      sampling_initial: 5
+      sampling_thereafter: 200
   service:
     pipelines:
       logs:
