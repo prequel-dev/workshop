@@ -60,18 +60,18 @@ spec:
           name: kafka-metrics
           key: zookeeper-metrics-config.yml
   entityOperator:
-    startupProbe:
-      initialDelaySeconds: 15
-      timeoutSeconds: 5
     template:
       topicOperatorContainer:
         env:
         - name: STRIMZI_USE_ZOOKEEPER_TOPIC_STORE
           value: "false"
     topicOperator:
+      startupProbe:
+        initialDelaySeconds: 60
+        timeoutSeconds: 5 
       resources:
         limits:
-          cpu: 70m
+          cpu: 100m
           memory: 540Mi
         requests:
           cpu: 20m
