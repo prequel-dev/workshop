@@ -60,6 +60,9 @@ spec:
           name: kafka-metrics
           key: zookeeper-metrics-config.yml
   entityOperator:
+    startupProbe:
+      initialDelaySeconds: 15
+      timeoutSeconds: 5
     template:
       topicOperatorContainer:
         env:

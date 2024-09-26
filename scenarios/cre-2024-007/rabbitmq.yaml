@@ -1,0 +1,32 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: import-definitions-v3
+spec:
+  replicas: 2
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 50m    # Lower CPU request
+    limits:
+      memory: 1Gi
+      cpu: 75m    # Lower CPU limit
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+            - name: rabbitmq
+              image: docker.io/bitnami/rabbitmq:3.9.14-debian-10-r15
+              volumeMounts:
+              - mountPath: /etc/rabbitmq/definitions.json
+                subPath: definitions.json # Name of the ConfigMap field containing definitions
+                name: definitions
+            volumes:
+            - name: definitions
+              configMap:
+                name: definitions # Name of the ConfigMap which contains definitions you wish to import
+  rabbitmq:
+    additionalConfig: |
+      load_definitions = /etc/rabbitmq/definitions.json # Path to the mounted definitions file
