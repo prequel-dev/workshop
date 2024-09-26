@@ -9,7 +9,7 @@ import (
 
 func main() {
     // Connect to RabbitMQ server
-    conn, err := amqp091.Dial("amqp://test:test@localhost:5672/")
+    conn, err := amqp091.Dial("amqp://guest:guest@localhost:5672/")
     if err != nil {
         log.Fatalf("Failed to connect to RabbitMQ: %s", err)
     }
