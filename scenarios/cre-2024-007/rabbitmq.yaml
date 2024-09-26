@@ -1,7 +1,7 @@
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
-  name: import-definitions-v3
+  name: import-definitions-v4
 spec:
   replicas: 2
   resources:
@@ -10,7 +10,7 @@ spec:
       cpu: 50m    # Lower CPU request
     limits:
       memory: 1Gi
-      cpu: 75m    # Lower CPU limit
+      cpu: 175m
   override:
     statefulSet:
       spec:
