@@ -175,7 +175,7 @@ resource "helm_release" "kafka_operator" {
   namespace  = "strimzi"
   create_namespace = true
   repository = "https://strimzi.io/charts/"
-  chart      = "strimzi/strimzi-kafka-operator"
+  chart      = "strimzi-kafka-operator"
   version    = "0.32.0"
 }
 
@@ -186,5 +186,5 @@ resource "helm_release" "rabbitmq_operator" {
   namespace  = "rabbitmq"
   create_namespace = true
   repository = "https://charts.bitnami.com/bitnami"
-  chart      = "bitnami/rabbitmq-cluster-operator"
+  chart      = "rabbitmq-cluster-operator"
 }
