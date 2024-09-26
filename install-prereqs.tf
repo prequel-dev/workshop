@@ -167,3 +167,24 @@ resource "helm_release" "otel_collector" {
     value = "{jaeger}"
   }
 }
+
+### Strimzi Kafka Cluster Operator
+
+resource "helm_release" "kafka" {
+  name       = "my-kafka"
+  namespace  = "strimzi"
+  create_namespace = true
+  repository = "https://strimzi.io/charts/"
+  chart      = "strimzi/strimzi-kafka-operator"
+  version    = "0.32.0"
+}
+
+### RabbitMQ Cluster Operator
+
+resource "helm_release" "kafka" {
+  name       = "my-rabbitmq"
+  namespace  = "rabbitmq"
+  create_namespace = true
+  repository = "https://charts.bitnami.com/bitnami"
+  chart      = "bitnami/rabbitmq-cluster-operator"
+}
