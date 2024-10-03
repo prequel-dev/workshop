@@ -158,6 +158,7 @@ resource "helm_release" "prequel" {
   create_namespace = true
   repository = "https://prequel-dev.github.io/helm"
   chart      = "prequel-collector"
+  wait = false
 
   set {
     name = "api.token"
