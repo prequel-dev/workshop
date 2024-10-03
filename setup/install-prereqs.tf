@@ -8,6 +8,16 @@ provider "kubernetes" {
   config_path = "~/.kubeconfig"
 }
 
+variable "prequel_provision_token" {
+  description = "Prequel provision token"
+  type        = string
+}
+
+variable "prequel_cluster_name" {
+  description = "Prequel cluster name"
+  type        = string
+}
+
 ### OpenTelemetry Collector
 
 resource "helm_release" "otel_collector" {
@@ -138,4 +148,24 @@ resource "helm_release" "rabbitmq_operator" {
   create_namespace = true
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "rabbitmq-cluster-operator"
+}
+
+### Prequel
+
+resource "helm_release" "prequel" {
+  name       = "prequel-latest"
+  namespace  = "prequel"
+  create_namespace = true
+  repository = "https://prequel-dev.github.io/helm"
+  chart      = "prequel-collector"
+
+  set {
+    name = "api.token"
+    value = var.prequel_provision_token
+  }
+
+  set {
+    name = "api.clusterName"
+    value = var.prequel_cluster_name
+  }
 }

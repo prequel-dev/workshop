@@ -1,0 +1,14 @@
+{
+  "uuid": "a55a55f8-8684-4f55-a9a1-75463334420a",
+  "name": "Prequel Workshop Org 7",
+  "domain": "prequelworkshop+org7@gmail.com",
+  "issuer": "https://accounts.google.com",
+  "audience": "https://accounts.google.com",
+  "token_endpoint": "https://oauth2.googleapis.com/token",
+  "web_auth_endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+  "web_client_id": "297875652479-80igtapjp12ugbv8d8m5e7v1kq7rn6tu.apps.googleusercontent.com",
+  "web_client_secret": "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",
+  "device_auth_endpoint": "https://oauth2.googleapis.com/device/code",
+  "device_client_id": "297875652479-g29gd3966a07j0c5qsg96g184kl3kuq1.apps.googleusercontent.com",
+  "device_client_secret": "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"
+}
