@@ -14,30 +14,49 @@ This scenario explores CRE-2024-009, a [known issue](https://github.com/open-tel
 
 ```
 {
-  "title": "OpenTelemetry Collector OOM Crash",
-  "description": "There is a known problem with the OpenTelemetry Collector where the collector can crash due to an out-of-memory (OOM) condition. This can cause the collector to stop processing telemetry data and can lead to gaps in the collected data. This can cause the collector to become unresponsive and can lead to liveness probe failures and restarts of the OpenTelemetry Collector.",
-  "type": "memory problems",
-  "severity": "critical",
-  "metrics": "container_memory_rss",
-  "symptoms": ["liveness/readiness probe timeouts", "most of the memory is coming from ingested OTLP data"]
-  "reports": 2,
-  "applications": [
-    {
-      "application": "opentelemetry-collector",
-      "versions": ["0.104.0", "0.105.0", "0.106.0", "0.107.0", "0.108.0", "0.109.0", "0.110.0", "0.111.0"]
-    }
-  ],
-  "cause": "backpressure exporting OTLP data to upstream destinations",
-  "solutions": ["Use the memory_limiter processor"]
-  "tags": ["",""],
-  "detections": [
-    {
-      "query language": "Prequel"
-      "rule": "k8(image_url="docker.io/otel/opentelemetry-collector*", event=OOM)"
-    }  
-  ]
-  "references": ["https://github.com/open-telemetry/opentelemetry-collector/discussions/4010"]
-  
+    "title": "OpenTelemetry Collector OOM Crash",
+    "description": "There is a known problem with the OpenTelemetry Collector where the collector can crash due to an out-of-memory (OOM) condition. This can cause the collector to stop processing telemetry data and can lead to gaps in the collected data. This can cause the collector to become unresponsive and can lead to liveness probe failures and restarts of the OpenTelemetry Collector.",
+    "type": "memory problems",
+    "severity": "critical",
+    "metrics": "container_memory_rss",
+    "symptoms": [
+        "liveness/readiness probe timeouts",
+        "most of the memory is coming from ingested OTLP data"
+    ],
+    "reports": 2,
+    "applications": [
+        {
+            "application": "opentelemetry-collector",
+            "versions": [
+                "0.104.0",
+                "0.105.0",
+                "0.106.0",
+                "0.107.0",
+                "0.108.0",
+                "0.109.0",
+                "0.110.0",
+                "0.111.0"
+            ]
+        }
+    ],
+    "cause": "backpressure exporting OTLP data to upstream destinations",
+    "solutions": [
+        "Use the memory_limiter processor"
+    ],
+    "tags": [
+        "OpenTelemetry",
+        "crash",
+        "memory"
+    ],
+    "detections": [
+        {
+            "query language": "Prequel",
+            "rule": "k8(image_url=\"docker.io/otel/opentelemetry-collector*\", event=OOM)"
+        }
+    ],
+    "references": [
+        "https://github.com/open-telemetry/opentelemetry-collector/discussions/4010"
+    ]
 }
 ```
 
