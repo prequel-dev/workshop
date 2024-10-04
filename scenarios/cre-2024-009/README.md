@@ -2,9 +2,44 @@
 
 ## Overview
 
-* The OpenTelemetry Collector is a key component in the OpenTelemetry project that acts as a centralized agent or service for collecting, processing, and exporting telemetry data such as traces, metrics, and logs from different applications and systems.
+The OpenTelemetry Collector is a key component in the [OpenTelemetry project](https://opentelemetry.io/) that acts as a centralized agent for collecting, processing, and exporting telemetry data such as traces, metrics, and logs from different applications and systems.
 
-* This exercise will introduce you to collecting and analyzing Jaeger traces with an OpenTelemetry collector. You will learn how to discover and troubleshoot problems with missing Observability data caused by a known issue. And finally, you will learn how to better manage and operate an OpenTelemetry collector at scale.
+This exercise will introduce you to monitoring the OpenTelemetry Collector. You will learn how to discover and troubleshoot problems with the Collector. And you will learn how to better manage and operate an OpenTelemetry collector at scale.
+
+## Common Relability Enumeration (CRE) 2024-009
+
+Reliability intelligence provides a way to describe known problems with software in a machine readiable way. This enables you to automatically detect and mitigate problems in your environment without spending troubleshooting and researching the problem yourself.
+
+This scenario explores CRE-2024-009, a [known issue](https://github.com/open-telemetry/opentelemetry-collector/discussions/4010) with using the OpenTelemetry Collector.
+
+```
+{
+  "title": "OpenTelemetry Collector OOM Crash",
+  "description": "There is a known problem with the OpenTelemetry Collector where the collector can crash due to an out-of-memory (OOM) condition. This can cause the collector to stop processing telemetry data and can lead to gaps in the collected data. This can cause the collector to become unresponsive and can lead to liveness probe failures and restarts of the OpenTelemetry Collector.",
+  "type": "memory problems",
+  "severity": "critical",
+  "metrics": "container_memory_rss",
+  "symptoms": ["liveness/readiness probe timeouts", "most of the memory is coming from ingested OTLP data"]
+  "reports": 2,
+  "applications": [
+    {
+      "application": "opentelemetry-collector",
+      "versions": ["0.104.0", "0.105.0", "0.106.0", "0.107.0", "0.108.0", "0.109.0", "0.110.0", "0.111.0"]
+    }
+  ],
+  "cause": "backpressure exporting OTLP data to upstream destinations",
+  "solutions": ["Use the memory_limiter processor"]
+  "tags": ["",""],
+  "detections": [
+    {
+      "query language": "Prequel"
+      "rule": "k8(image_url="docker.io/otel/opentelemetry-collector*", event=OOM)"
+    }  
+  ]
+  "references": ["https://github.com/open-telemetry/opentelemetry-collector/discussions/4010"]
+  
+}
+```
 
 ## Lab
 
