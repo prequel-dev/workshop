@@ -30,12 +30,12 @@ resource "helm_release" "otel_collector" {
 
   set {
     name = "resources.limits.memory"
-    value = "500Mi"
+    value = "200Mi"
   }
 
   set {
     name = "resources.requests.memory"
-    value = "500Mi"
+    value = "200Mi"
   }
 
   set {
