@@ -156,9 +156,7 @@ Questions:
 
 ### Step 5: Implement mitigation (2 minutes)
 
-Click on How To Mitigate -> Details
-
-What are the recommended changes to fix this problem?
+Click on How To Mitigate -> Details. What are the recommended changes to fix this problem?
 
 Use `diff -y` to see the changes before applying them.
 

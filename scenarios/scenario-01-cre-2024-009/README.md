@@ -135,9 +135,7 @@ k8(image_url="docker.io/otel/opentelemetry-collector*", event=OOMKilled)
 
 ### Step 4: Implement mitigation (10 minutes)
 
-Click on How To Mitigate -> Details
-
-Then edit the OpenTelemetry configuration and apply the recommended Prequel mitigation.
+Click on How To Mitigate -> Details. Then edit the OpenTelemetry configuration and apply the recommended Prequel mitigation.
 
 ```
 $ kubectl -n monitoring edit configmap otel-collector-opentelemetry-collector 
