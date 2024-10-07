@@ -60,7 +60,7 @@ This scenario explores CRE-2024-009, a [known issue](https://github.com/open-tel
 }
 ```
 
-## Lab
+## Lab (About 20 minutes)
 
 ### Step 1: Monitor metrics for OpenTelemetry Collector (1 minute)
 

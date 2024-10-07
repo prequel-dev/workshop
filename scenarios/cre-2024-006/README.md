@@ -49,7 +49,7 @@ This scenario explores CRE-2024-006, a [known issue](https://github.com/strimzi/
 }
 ```
 
-## Lab
+## Lab (About 20 minutes)
 
 ### Step 1: Add a new Kafka topic (5 minutes)
 
