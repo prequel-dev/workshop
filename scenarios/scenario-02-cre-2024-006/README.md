@@ -57,23 +57,13 @@ This lab exercise uses [Strimzi Kafka for Kubernetes](https://strimzi.io/). Stri
 
 Let's discover how to add new Kafka topics. Kafka topics are the categories used to organize messages. Each topic has a name that is unique across the entire Kafka cluster. Messages are sent to and read from specific topics. Producers write data to topics and consumers read data from topics. 
 
-We can get a list of current topics by enumerating the `kafkatopics.kafka.stirmzi.io` CRD.
-
-```bash
-$ kubectl -n strimzi get kafkatopics.kafka.strimzi.io 
-NAME                                                                                               CLUSTER      PARTITIONS   REPLICATION FACTOR   READY
-consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a                                        my-cluster   50           2                    True
-strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55                                     my-cluster   1            2                    True
-strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b   my-cluster   1            2                    True
-```
-
 The Strimzi Kafka [entity operator](https://strimzi.io/docs/operators/0.28.0/full/configuring#assembly-kafka-entity-operator-str) contains a user and topic operator. The operators are automatically configured to monitor and manage the topics and users of the Kafka cluster.
 
 Add a new topic by applying the `topic-00.yaml` configuration file. 
 
 ```bash
 $ kubectl -n strimzi apply -f ./topic-00.yaml 
-kafkatopic.kafka.strimzi.io/topic-00 configured
+kafkatopic.kafka.strimzi.io/topic-00 created
 ```
 
 After a few minutes you should see that the new topic `topic-00` is ready.
@@ -81,9 +71,6 @@ After a few minutes you should see that the new topic `topic-00` is ready.
 ```bash
 $ kubectl -n strimzi get kafkatopics.kafka.strimzi.io 
 NAME                                                                                               CLUSTER      PARTITIONS   REPLICATION FACTOR   READY
-consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a                                        my-cluster   50           2                    True
-strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55                                     my-cluster   1            2                    True
-strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b   my-cluster   1            2                    True
 topic-00                                                                                           my-cluster   3            1                    True
 ```
 
@@ -91,34 +78,46 @@ topic-00                                                                        
 
 Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.classroom.superorbital.io/ (change `XX` to your lab number found on your lab worksheet printout).
 
-Visualize metrics for Kafka by viewing a graph of the following metrics:
+Use Prometheus to visualize the health of Kafka topic creation using the following metric:
 
 ```
-kafka_controller_controllerstats_topicchangerateandtimems_count
+kafka_controller_controllerstats_topicchangerateandtimems{container="kafka", namespace="strimzi", quantile="0.999"}
 ```
 
-![Kafka Topic Operator metrics](./images/kafka-topic-changerate.png)
+![Kafka Topic Operator metrics](./images/kafka-changetime.png)
+
+The Kafka metric `kafka_controller_controllerstats_topicchangerateandtimems` is a controller-level metric that measures the rate and time taken for changes related to Kafka topics. It captures two key pieces of information:
+
+1. Topic Change Rate: This part of the metric tracks how frequently changes to Kafka topics occur. Topic changes could include operations such as creating, deleting, or altering a topic's configuration or partition structure.
+
+2. Topic Change Time (in milliseconds): This part tracks the time taken for the controller to process these topic changes, measured in milliseconds. It reflects how long the Kafka controller takes to detect and apply these changes.
+
+This metric is useful for monitoring the responsiveness of the Kafka controller to topic-related changes and understanding the load that topic modifications place on the system. High change rates or long processing times could indicate bottlenecks or performance issues in the Kafka controller.
+
+The 0.999 quantile means that 99.9% of the time, topic changes take less than or equal to the value reported by this metric.
 
 Question:
 
 * What other Kafka metrics might be important to monitor the health of Kafka topic creation?
 
-### Step 3: Trigger problem (5 minutes)
+### Step 3: Trigger problem (10 minutes)
 
 Now let's recreate the problem associated with CRE-2024-006.
 
 ```bash
 $ kubectl -n strimzi apply -f ./kafka-metrics-01.yaml
+kafka.kafka.strimzi.io/my-cluster configured
+configmap/kafka-metrics unchanged
 ```
 
-Monitor Kubernetes events to wait until the entity operator is successfully re-created.
+Monitor Kubernetes events to wait until the entity operator is successfully re-created. This can take a few minutes for the Strimzi Kafka operator to reconcile the configuration change. 
 
 ```bash
 $ kubectl -n strimzi get events -w -A | grep SuccessfulCreate
 strimzi      0s          Normal    SuccessfulCreate    replicaset/my-cluster-entity-operator-67cb786575   Created pod: my-cluster-entity-operator-67cb786575-46888
 ```
 
-Now create a new topic.
+Now create another topic.
 
 ```bash
 $ kubectl -n strimzi apply -f ./topic-01.yaml 
@@ -130,19 +129,17 @@ Watch the `kafkatopics.kafka.strimzi.io` resources.
 ```bash
 $ kubectl -n strimzi get kafkatopics.kafka.strimzi.io -w
 NAME                                                                                               CLUSTER      PARTITIONS   REPLICATION FACTOR   READY
-consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a                                        my-cluster   50           2                    True
-strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55                                     my-cluster   1            2                    True
-strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b   my-cluster   1            2                    True
 topic-00                                                                                           my-cluster   3            1                    True
 topic-01                                                                                           my-cluster   3            1                    
 ```
 
 Questions: 
 
-* What do you observe with the new topic?
-* What metrics can you monitor in Prometheus to see what is happening?
-* Why is it happening? What steps would you need to take to figure it out?
+* What do you observe with the new topic? Does it get created? Why or why not?
+* Does the `kafka_controller_controllerstats_topicchangerateandtimems` metric in Prometheus help you understand what is happening?
+* Why isn't the new topic being created? What steps would you need to take to figure this out?
 * How would we fix it?
+* What other metrics can we explore to help monitor this problem? Do any of the `vertx*` metrics help?
 * How could you create an alert for this with Prometheus/Alertmanager?
 
 ### Step 4: Use Prequel to detect problem (1 minute)
@@ -189,23 +186,20 @@ $ diff -y kafka-metrics-01.yaml kafka-metrics-00.yaml
 Apply the recommended Prequel mitigation.
 
 ```bash
-$ kubectl -n strimzi apply -f ./kafka-metrics-01.yaml
+$ kubectl -n strimzi apply -f ./kafka-metrics-00.yaml
 ```
 
-### Step 6: Trigger problem (2 minutes)
-
-Now check the topics to see if the new topic is created.
+Watch the `kafkatopics.kafka.strimzi.io` resources to ensure the new topic is created.
 
 ```bash
 $ kubectl -n strimzi get kafkatopics.kafka.strimzi.io -w
 NAME                                                                                               CLUSTER      PARTITIONS   REPLICATION FACTOR   READY
-consumer-offsets---84e7a678d08f4bd226872e5cdd4eb527fadc1c6a                                        my-cluster   50           2                    True
-strimzi-store-topic---effb8e3e057afce1ecf67c3f5d8e4e3ff177fc55                                     my-cluster   1            2                    True
-strimzi-topic-operator-kstreams-topic-store-changelog---b75e702040b99be8a9263134de3507fc0cc4017b   my-cluster   1            2                    True
 topic-00                                                                                           my-cluster   3            1                    True
 topic-01                                                                                           my-cluster   3            1                    True
 ```
 
 ## Key Takeaways
 
-* All the data in one place
+* Some reliability problems are challenging to detect using just metrics
+* Creating detections that join data across metrics, events, and logs can enable the creation of detections with low signal-to-noise ratios
+* Relability intelligence can reduce the time to learn about known failure

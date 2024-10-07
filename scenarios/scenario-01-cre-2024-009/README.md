@@ -186,6 +186,7 @@ Use both Prometheus and Prequel to see if the problem happens again.
 
 ## Key Takeaways
 
+* The OpenTelemetry Collector `memory_limiter` processor is an important pipeline component, especially in larger scale environments
 * Reliability research and intelligence can reduce the time to monitor, understand, and mitigate problems
 * Wildcard support for fields like `image_urls` can reduce the number of rules required to detect problems
 * Visualizing service graphs in the context of a specific detection can help further identify contributing factors to an ongoing problem
