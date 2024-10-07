@@ -102,9 +102,9 @@ Questions:
 
 Go to https://app-beta.prequel.dev and log in using your credentials. The credentials are found on your lab worksheet printout.
 
-Click on the new detection.
+Click on the most recent detection and explore the detection data and graph.
 
-Explore the detection data and graph.
+Questions:
 
 * What does the detection tell you is happening?
 * Are you able to figure out why it might be happening from the log and HTTP data in the detection?
@@ -123,7 +123,7 @@ $ kubectl -n monitoring edit configmap otel-collector-opentelemetry-collector
 
 Ensure that the `memory_limiter` processor is configured.
 
-```
+```bash
 processors:
   batch: {}
   memory_limiter:
@@ -134,7 +134,7 @@ processors:
 
 And make sure that the traces pipeline uses the processor.
 
-```
+```bash
 traces:
   exporters:
   - otlp
@@ -147,7 +147,7 @@ traces:
 
 Restart the collector to apply the configuration changes and ensure it started running successfully.
 
-```
+```bash
 $ kubectl -n monitoring rollout restart deployment otel-collector-opentelemetry-collector
 $ kubectl -n monitoring get pods
 NAME                                                      READY   STATUS    RESTARTS   AGE
