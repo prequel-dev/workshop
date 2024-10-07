@@ -16,11 +16,11 @@ spec:
         type: internal
         tls: true
     readinessProbe:
-      initialDelaySeconds: 60
-      timeoutSeconds: 10
+      initialDelaySeconds: 15
+      timeoutSeconds: 5
     livenessProbe:
-      initialDelaySeconds: 60
-      timeoutSeconds: 10
+      initialDelaySeconds: 15
+      timeoutSeconds: 5
     config:
       offsets.topic.replication.factor: 2
       transaction.state.log.replication.factor: 2
@@ -64,15 +64,8 @@ spec:
       topicOperatorContainer:
         env:
         - name: STRIMZI_USE_ZOOKEEPER_TOPIC_STORE
-          value: "false"
-    topicOperator:
-      resources:
-        limits:
-          cpu: 60m
-          memory: 540Mi
-        requests:
-          cpu: 20m
-          memory: 300Mi
+          value: "true"
+    topicOperator: {}
     userOperator: {}
   kafkaExporter:
     topicRegex: ".*"
