@@ -153,6 +153,11 @@ Questions:
 * What does the detection tell you is happening?
 * Are you able to figure out why it might be happening from the log data in the detection?
 * Are you able to figure out how to mitigate the problem?
+* What are the differences between an Alertmanager rule for this problem and a reliability intelligence detection?
+
+```bash
+k8(container_name="topic-operator", event=STARTUP) | log(pattern="io.vertx.core.VertxException: Thread blocked", window=90s)
+```
 
 ### Step 5: Implement mitigation (2 minutes)
 
