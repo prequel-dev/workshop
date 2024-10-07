@@ -64,17 +64,17 @@ spec:
       topicOperatorContainer:
         env:
         - name: STRIMZI_USE_ZOOKEEPER_TOPIC_STORE
-          value: "false"
+          value: "true"
     topicOperator:
       startupProbe:
         initialDelaySeconds: 60
         timeoutSeconds: 5 
       resources:
         limits:
-          cpu: 100m
+          cpu: 500m
           memory: 540Mi
         requests:
-          cpu: 20m
+          cpu: 100m
           memory: 300Mi
     userOperator: {}
   kafkaExporter:
