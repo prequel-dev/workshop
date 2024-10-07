@@ -93,7 +93,7 @@ Use Prometheus to monitor the metrics for the OpenTelemetry Collector container 
 
 Questions: 
 
-* What do you see happening?
+* What do you see happening in Prometheus?
 * Why is it happening? What steps would you need to take to figure it out?
 * How would we fix it?
 * How could you create an alert for this with Prometheus/Alertmanager?
