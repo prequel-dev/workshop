@@ -60,27 +60,27 @@ resource "helm_release" "otel_collector" {
 
   set {
     name = "config.extensions.zpages.endpoint"
-    value = "localhost:55679"
+    value = "0.0.0.0:55679"
   }
 
   set {
     name = "config.receivers.otlp.protocols.grpc.endpoint"
-    value = "localhost:4317"
+    value = "0.0.0.0:4317"
   }
 
   set {
     name = "config.receivers.otlp.protocols.http.endpoint"
-    value = "localhost:4318"
+    value = "0.0.0.0:4318"
   }
 
   set {
     name = "config.receivers.jaeger.protocols.thrift_http.endpoint"
-    value = "localhost:14268"
+    value = "0.0.0.0:14268"
   }
 
   set {
     name = "config.exporters.otlp.endpoint"
-    value = "localhost:4319"
+    value = "localhost:4319" # Intentionally misconfigure export address 
   }
 
   set {

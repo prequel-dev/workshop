@@ -25,6 +25,7 @@ var (
 
 func initTracer() func() {
 	// Configure the Jaeger exporter to send data to the Otel Collector
+	fmt.Printf("Using collector address: %s\n", address)
 	collectorEndpoint := fmt.Sprintf("http://%s/api/traces", address)
 
 	exp, err := jaeger.New(

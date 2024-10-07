@@ -69,24 +69,31 @@ Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.c
 Visualize memory usage for the Opentelemetry Collector by viewing a graph of the `container_memory_rss` metric in the `monitoring` namespace.
 
 ```
-container_memory_rss{namespace="monitoring"}
+container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}
 ```
 
-![Monitor OTel Collector memory](./images/prom-otel.png)
+![Monitor OTel Collector memory](./images/otel-rss.png)
 
 ### Step 2: Trigger problem (2 minutes)
 
 Now let's generate traces and send them to the OpenTelemetry Collector. In your terminal, run the following commands:
 
-```
-$ cd ./trace_generator
-$ ./run.sh
-Starting port-forward proxy
-Generating traces
+```bash
+$ cd ./trace_generator/k8s
+$ kubectl -n monitoring apply -f ./deploy.yaml
+deployment.apps/traces-generator-deployment created
+$ kubectl -n monitoring logs deployments/traces-generator-deployment -f 
+Using collector address: otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:14268
 Generating 400 total traces using 4 workers...
-Forwarding from 127.0.0.1:14268 -> 14268
-Forwarding from [::1]:14268 -> 14268
-Handling connection for 14268
+2024/10/07 18:38:23 Post "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces": EOF
+2024/10/07 18:38:27 Post "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces": dial tcp 10.119.252.93:14268: connect: connection refused
+```
+
+Delete the deployment when you see the above EOF and connection refused errors.
+
+```bash
+$ k -n monitoring delete deployments.apps traces-generator-deployment 
+deployment.apps "traces-generator-deployment" deleted
 ```
 
 Use Prometheus to monitor the metrics for the OpenTelemetry Collector container in the `monitoring` namespace.
@@ -108,7 +115,7 @@ Questions:
 
 * What does the detection tell you is happening?
 * Are you able to figure out why it might be happening from the log and HTTP data in the detection?
-* Where is it coming from?
+* Where is it coming from using the graph?
 * Are you able to figure out how to mitigate the problem?
 
 ### Step 4: Implement mitigation (10 minutes)

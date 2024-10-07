@@ -1,4 +1,4 @@
-ARG BUILD_IMAGE=513710883148.dkr.ecr.us-east-2.amazonaws.com/prequel-builder:0.0.7@sha256:2612a3481693be516d44644ae7d6d0f52e59616c28350480ed5bee2246d841a9
+ARG BUILD_IMAGE=513710883148.dkr.ecr.us-east-2.amazonaws.com/prequel-builder:0.0.8@sha256:56626b98feede633b8683655a363e51785946583d190b1074813a0dac603b476
 ARG GO_OCI_BASE_LIBC=gcr.io/distroless/base-nossl@sha256:73c3d3f3030516665c916ebc9baa80f89c1a90e438dc02f1fed525ed246c0c2a
 ARG GO_OCI_BASE_STATIC=gcr.io/distroless/static@sha256:41972110a1c1a5c0b6adb283e8aa092c43c31f7c5d79b8656fbffff2c3e61f05
 
