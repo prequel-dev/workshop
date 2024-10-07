@@ -105,6 +105,13 @@ Questions:
 * How would we fix it?
 * How could you create an alert for this with Prometheus/Alertmanager?
 
+Suggested metrics for Alertmanager rules:
+
+```bash
+kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="opentelemetry-collector"}
+container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentelemetry-collector-k8s:0.111.0"}
+```
+
 ### Step 3: Use Prequel to detect problem (1 minute)
 
 Go to https://app-beta.prequel.dev and log in using your credentials. The credentials are found on your lab worksheet printout.
@@ -117,6 +124,11 @@ Questions:
 * Are you able to figure out why it might be happening from the log and HTTP data in the detection?
 * Where is it coming from using the graph?
 * Are you able to figure out how to mitigate the problem?
+* What is different about the detection logic?
+
+```bash
+k8(image_url="docker.io/otel/opentelemetry-collector*", event=OOMKilled)
+```
 
 ### Step 4: Implement mitigation (10 minutes)
 
@@ -171,4 +183,6 @@ Use both Prometheus and Prequel to see if the problem happens again.
 
 ## Key Takeaways
 
-* All the data in one place
+* Reliability research and intelligence can reduce the time to monitor, understand, and mitigate problems
+* Wildcard support for fields like `image_urls` can reduce the number of rules required to detect problems
+* Visualizing service graphs in the context of a specific detection can help further identify contributing factors to an ongoing problem
