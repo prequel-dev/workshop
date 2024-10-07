@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traces-generator-deployment
+spec:
+  selector:
+    matchLabels:
+      app: traces-generator-deployment
+  template:
+    metadata:
+      labels:
+        app: traces-generator-deployment
+    spec:
+      containers:
+      - name: traces-generator
+        image: public.ecr.aws/prequel-dev/workshop/traces-generator:latest
+        env:
+        - name: COLLECTOR_ADDRESS
+          value: "otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:14268"

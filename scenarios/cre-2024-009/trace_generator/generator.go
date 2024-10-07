@@ -12,14 +12,20 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 
+	"github.com/prequel-dev/prequel-core/pkg/envz"
+
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
+var (
+	address = envz.MustEnv("COLLECTOR_ADDRESS", "localhost:14268")
+)
+
 func initTracer() func() {
 	// Configure the Jaeger exporter to send data to the Otel Collector
-	collectorEndpoint := "http://localhost:14268/api/traces"
+	collectorEndpoint := fmt.Sprintf("http://%s/api/traces", address)
 
 	exp, err := jaeger.New(
 		jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(collectorEndpoint)),
@@ -71,7 +77,7 @@ func generateTraces(numTraces int, workerID int, wg *sync.WaitGroup) {
 
 		// Add lots of large tag strings to the span
 		for j := 0; j < 1000; j++ { // Number of attributes to add (adjust as needed)
-			largeString := generateLargeString(1024*10) // Size of each attribute value in bytes
+			largeString := generateLargeString(1024 * 10) // Size of each attribute value in bytes
 			span.SetAttributes(attribute.String(fmt.Sprintf("large_attribute_%d", j), largeString))
 		}
 
