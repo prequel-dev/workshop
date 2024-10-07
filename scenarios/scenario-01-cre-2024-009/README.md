@@ -108,8 +108,11 @@ Questions:
 Suggested metrics for Alertmanager rules:
 
 ```bash
-kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="opentelemetry-collector"}
 container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentelemetry-collector-k8s:0.111.0"}
+```
+
+```bash
+kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="opentelemetry-collector"}
 ```
 
 ### Step 3: Use Prequel to detect problem (1 minute)
