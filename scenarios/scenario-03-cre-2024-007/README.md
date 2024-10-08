@@ -133,6 +133,51 @@ Questions:
 * Are you able to figure out how to mitigate the problem?
 * What are the differences between an Alertmanager rule for this problem and a reliability intelligence detection?
 
+#### Problem Explanation
+
+Note the following details in the RabbitMQ logs.
+
+```bash
+$ kubectl -n rabbitmq logs my-rabbitmq-cluster-server-0 -f
+2024-10-08 20:51:10.016352+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.3078140120.3381919745.170350>}} from <0.228.0> to <0.1647.0> in an old incarnation (1728420096) of this node (1728420613)
+2024-10-08 20:51:10.016352+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016352+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016386+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.3078140120.3381919745.170350>}} from <0.228.0> to <0.5457.0> in an old incarnation (1728420096) of this node (1728420613)
+2024-10-08 20:51:10.016386+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016386+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016410+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.3078140120.3381919745.170350>}} from <0.228.0> to <0.1722.0> in an old incarnation (1728420096) of this node (1728420613)
+2024-10-08 20:51:10.016410+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016410+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016466+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.3078140120.3381919745.170350>}} from <0.228.0> to <0.9450.0> in an old incarnation (1728420096) of this node (1728420613)
+2024-10-08 20:51:10.016466+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016466+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016489+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.3078140120.3381919745.170350>}} from <0.228.0> to <0.1689.0> in an old incarnation (1728420096) of this node (1728420613)
+2024-10-08 20:51:10.016489+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016489+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016502+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.3078140120.3381919745.170350>}} from <0.228.0> to <0.2464.0> in an old incarnation (1728420096) of this node (1728420613)
+2024-10-08 20:51:10.016502+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016502+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016523+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.3078140120.3381919745.170350>}} from <0.228.0> to <0.9358.0> in an old incarnation (1728420096) of this node (1728420613)
+2024-10-08 20:51:10.016523+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:10.016523+00:00 [erro] <0.228.0> 
+2024-10-08 20:51:13.025141+00:00 [info] <0.518.0> Starting message stores for vhost '/'
+2024-10-08 20:51:13.027194+00:00 [info] <0.523.0> Message store "628WB79CIFDYO9LJI6DKMI09L/msg_store_transient": using rabbit_msg_store_ets_index to provide index
+2024-10-08 20:51:13.033736+00:00 [info] <0.518.0> Started message store of type transient for vhost '/'
+2024-10-08 20:51:13.041279+00:00 [info] <0.527.0> Message store "628WB79CIFDYO9LJI6DKMI09L/msg_store_persistent": using rabbit_msg_store_ets_index to provide index
+2024-10-08 20:51:13.045213+00:00 [warn] <0.527.0> Message store "628WB79CIFDYO9LJI6DKMI09L/msg_store_persistent": rebuilding indices from scratch
+2024-10-08 20:53:37.827165+00:00 [info] <0.518.0> Started message store of type persistent for vhost '/'
+2024-10-08 20:54:22.217300+00:00 [warn] <0.286.0> Mnesia('rabbit@my-rabbitmq-cluster-server-0.my-rabbitmq-cluster-nodes.rabbitmq'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2024-10-08 20:54:22.217300+00:00 [warn] <0.286.0> 
+2024-10-08 20:54:50.923258+00:00 [warn] <0.286.0> Mnesia('rabbit@my-rabbitmq-cluster-server-0.my-rabbitmq-cluster-nodes.rabbitmq'): ** WARNING ** Mnesia is overloaded: {dump_log,write_threshold}
+2024-10-08 20:56:22.845471+00:00 [info] <0.518.0> Recovering 872 queues of type rabbit_classic_queue took 312609ms
+```
+
+#### What is happening?
+
+The RabbitMQ cluster is processing a large number of persistent mirrored queues at boot. There are so many that the underlying Erlang process, `Mnesia`, is reporting that it is overloaded while recoving these queues on boot. During this period, RabbitMQ is unable to process any new messages, which can lead to outages.
+
+Note that there are no RabbitMQ VM threshold watermark alerts.
+
 ### Step 5: Implement mitigation (2 minutes)
 
 Click on How To Mitigate -> Details. What are the recommended changes to fix this problem?
