@@ -16,4 +16,6 @@ spec:
         image: public.ecr.aws/prequel-dev/workshop/messages-generator:latest
         env:
         - name: RMQ_ADDRESS
-          value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5673"
+          value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5672"
+        - name: RMQ_QUEUES
+          value: 1000
