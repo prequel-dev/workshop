@@ -1,19 +1,19 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: messages-generator-deployment
+  name: messages-generator-job
 spec:
-  selector:
-    matchLabels:
-      app: messages-generator-deployment
+  completions: 5
+  parallelism: 5
   template:
     metadata:
       labels:
-        app: messages-generator-deployment
+        app: messages-generator-job
     spec:
+      restartPolicy: Never
       containers:
       - name: messages-generator
         image: public.ecr.aws/prequel-dev/workshop/messages-generator:latest
         env:
         - name: RMQ_ADDRESS
-          value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5672"
+          value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5673"
