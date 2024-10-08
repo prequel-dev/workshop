@@ -14,6 +14,8 @@ var (
 	address       = envz.MustEnv("RMQ_ADDRESS", "localhost:5672")
 	totalQueues   = envz.MustEnv("RMQ_QUEUES", 4000)
 	numGoroutines = envz.MustEnv("GOROUTINES", 32)
+	jobNumber     = envz.MustEnv("JOB_NUMBER", 0)
+	totalJobs     = envz.MustEnv("JOB_TOTAL", 10)
 )
 
 func main() {
@@ -26,6 +28,8 @@ func main() {
 
 	// Number of Goroutines to use
 	queuesPerGoroutine := totalQueues / numGoroutines
+
+	jobOffset := jobNumber * totalQueues / totalJobs
 
 	var wg sync.WaitGroup
 
@@ -42,8 +46,9 @@ func main() {
 			defer ch.Close()
 
 			// Calculate the range of queues for this Goroutine
-			startQueue := g*queuesPerGoroutine + 1
-			endQueue := (g + 1) * queuesPerGoroutine
+			startQueue := g*queuesPerGoroutine + 1 + jobOffset
+			endQueue := (g+1)*queuesPerGoroutine + jobOffset
+
 			// Handle any remaining queues in the last Goroutine
 			if g == numGoroutines-1 {
 				endQueue = totalQueues

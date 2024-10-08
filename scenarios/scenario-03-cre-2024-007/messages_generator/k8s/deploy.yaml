@@ -5,6 +5,7 @@ metadata:
 spec:
   completions: 10
   parallelism: 10
+  completionMode: Indexed
   template:
     metadata:
       labels:
@@ -18,4 +19,8 @@ spec:
         - name: RMQ_ADDRESS
           value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5672"
         - name: RMQ_QUEUES
-          value: "400"
+          value: "4000"
+        - name: JOB_NUMBER
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['batch.kubernetes.io/job-completion-index']
