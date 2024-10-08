@@ -30,4 +30,5 @@ spec:
   rabbitmq:
     additionalConfig: |
       vm_memory_high_watermark.absolute = 4Gi
+      loopback_users.guest = false
       load_definitions = /etc/rabbitmq/definitions.json
