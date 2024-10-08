@@ -4,7 +4,11 @@ JOB_MANIFEST="messages_generator/k8s/deploy.yaml"
 JOB_NAME="messages-generator-job"
 CHECK_INTERVAL=5
 
-echo "Deploying the Job..."
+#set -x
+
+kubectl -n rabbitmq delete job $JOB_NAME
+
+echo "Deploying the problem trigger job..."
 kubectl -n rabbitmq apply -f $JOB_MANIFEST
 
 echo "Waiting for the Job '$JOB_NAME' to complete..."
