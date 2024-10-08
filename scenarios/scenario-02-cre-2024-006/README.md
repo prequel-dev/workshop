@@ -8,7 +8,7 @@ This exercise will introduce you to creating and using Kafka topics. You will le
 
 ## Common Relability Enumeration (CRE) 2024-009
 
-Reliability intelligence provides a way to describe known problems with software in a machine readiable way. This enables you to automatically detect and mitigate problems in your environment without spending troubleshooting and researching the problem yourself.
+Reliability intelligence provides a way to describe known problems with software in a machine readable way. This enables you to automatically detect and mitigate problems in your environment without spending time troubleshooting and researching the problem yourself.
 
 This scenario explores CRE-2024-006, a [known issue](https://github.com/strimzi/strimzi-kafka-operator/issues/6046) with using the Strimzi Kafka topic operator.
 
@@ -57,7 +57,7 @@ This lab exercise uses [Strimzi Kafka for Kubernetes](https://strimzi.io/). Stri
 
 Let's discover how to add new Kafka topics. Kafka topics are the categories used to organize messages. Each topic has a name that is unique across the entire Kafka cluster. Messages are sent to and read from specific topics. Producers write data to topics and consumers read data from topics. 
 
-The Strimzi Kafka [entity operator](https://strimzi.io/docs/operators/0.28.0/full/configuring#assembly-kafka-entity-operator-str) contains a user and topic operator. The operators are automatically configured to monitor and manage the topics and users of the Kafka cluster.
+The Strimzi Kafka [entity operator](https://strimzi.io/docs/operators/0.28.0/full/configuring#assembly-kafka-entity-operator-str) is used to manage Kafka-related entities in a running Kafka cluster. It contains a user and topic operator. The operators are automatically configured to monitor and manage the topics and users of the Kafka cluster.
 
 Add a new topic by applying the `topic-00.yaml` configuration file. 
 
