@@ -9,7 +9,7 @@ spec:
       memory: 512Mi
       cpu: 50m
     limits:
-      memory: 1Gi
+      memory: 4Gi
       cpu: 175m
   override:
     statefulSet:
@@ -21,12 +21,13 @@ spec:
               image: docker.io/bitnami/rabbitmq:3.9.14-debian-10-r15
               volumeMounts:
               - mountPath: /etc/rabbitmq/definitions.json
-                subPath: definitions.json # Name of the ConfigMap field containing definitions
+                subPath: definitions.json
                 name: definitions
             volumes:
             - name: definitions
               configMap:
-                name: definitions # Name of the ConfigMap which contains definitions you wish to import
+                name: definitions
   rabbitmq:
     additionalConfig: |
-      load_definitions = /etc/rabbitmq/definitions.json # Path to the mounted definitions file
+      vm_memory_high_watermark.absolute = 4Gi
+      load_definitions = /etc/rabbitmq/definitions.json
