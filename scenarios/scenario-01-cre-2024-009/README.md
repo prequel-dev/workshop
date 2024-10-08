@@ -51,7 +51,7 @@ This scenario explores CRE-2024-009, a [known issue](https://github.com/open-tel
     "detections": [
         {
             "query language": "Prequel",
-            "rule": "k8(image_url=\"docker.io/otel/opentelemetry-collector*\", event=OOM)"
+            "rule": "k8(image_url=\"docker.io/otel/opentelemetry-collector*\", event=OOMKilling)"
         }
     ],
     "references": [
