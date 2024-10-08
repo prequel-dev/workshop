@@ -96,6 +96,8 @@ This metric is useful for monitoring the responsiveness of the Kafka controller 
 
 The 0.999 quantile means that 99.9% of the time, topic changes take less than or equal to the value reported by this metric.
 
+You can explore additional Kafka metrics by typing `kafka_` in the search bar and reviewing the list of metrics. Or you can use the Metrics Explorer interface next to the Execute button.
+
 Question:
 
 * What other Kafka metrics might be important to monitor the health of Kafka topic creation?
