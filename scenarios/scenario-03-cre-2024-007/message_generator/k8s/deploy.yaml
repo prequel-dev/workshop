@@ -14,3 +14,6 @@ spec:
       containers:
       - name: messages-generator
         image: public.ecr.aws/prequel-dev/workshop/messages-generator:latest
+        env:
+        - name: RMQ_ADDRESS
+          value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5672"
