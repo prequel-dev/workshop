@@ -6,9 +6,9 @@ The OpenTelemetry Collector is a key component in the [OpenTelemetry project](ht
 
 This exercise will introduce you to monitoring the OpenTelemetry Collector. You will learn how to discover and troubleshoot problems with the Collector. And you will learn how to better manage and operate an OpenTelemetry collector at scale.
 
-## Common Relability Enumeration (CRE) 2024-009
+## Common Reliability Enumeration (CRE) 2024-009
 
-Reliability intelligence provides a way to describe known problems with software in a machine readiable way. This enables you to automatically detect and mitigate problems in your environment without spending troubleshooting and researching the problem yourself.
+Reliability intelligence provides a way to describe known problems with software in a machine readable way. This enables you to automatically detect and mitigate problems in your environment without spending time troubleshooting and researching the problem yourself.
 
 This scenario explores CRE-2024-009, a [known issue](https://github.com/open-telemetry/opentelemetry-collector/discussions/4010) with using the OpenTelemetry Collector.
 
@@ -98,12 +98,14 @@ deployment.apps "traces-generator-deployment" deleted
 
 Use Prometheus to monitor the metrics for the OpenTelemetry Collector container in the `monitoring` namespace.
 
-Questions: 
+**Questions:** 
 
 * What do you see happening in Prometheus?
 * Why is it happening? What steps would you need to take to figure it out?
 * How would we fix it?
 * How could you create an alert for this with Prometheus/Alertmanager?
+
+**Hints:** 
 
 Suggested metrics for Alertmanager rules:
 
@@ -121,11 +123,11 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data and graph.
 
-Questions:
+**Questions:**
 
 * What does the detection tell you is happening?
 * Are you able to figure out why it might be happening from the log and HTTP data in the detection?
-* Where is it coming from using the graph?
+* Where is it coming from based on the graph?
 * Are you able to figure out how to mitigate the problem?
 * What is different about the detection logic?
 
