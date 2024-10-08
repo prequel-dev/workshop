@@ -50,23 +50,21 @@ This scenario explores CRE-2024-007, a [known issue](https://github.com/rabbitmq
 
 ## Lab (about 20 minutes)
 
-### Step 1: Do stuff (5 minutes)
-
-### Step 2: Monitor metrics for Kafka (1 minutes)
+### Step 1: Monitor metrics for RabbitMQ (1 minutes)
 
 Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.classroom.superorbital.io/ (change `XX` to your lab number found on your lab worksheet printout).
 
-Use Prometheus to visualize the health of ...
+Use Prometheus to visualize a few relevant metrics to monitor the health of your RabbitMQ cluster.
 
 ```
-some_metric
+rabbitmq_alarms_memory_used_watermark{namespace="rabbitmq"}
 ```
 
-![Kafka Topic Operator metrics](./images/kafka-changetime.png)
+![RabbitMQ alarm metrics](./images/rabbitmq-alarm.png)
 
 Question:
 
-* What other RabbitMQ metrics might be important to monitor ....?
+* What other RabbitMQ metrics might be important to monitor?
 
 ### Step 3: Trigger problem (10 minutes)
 
