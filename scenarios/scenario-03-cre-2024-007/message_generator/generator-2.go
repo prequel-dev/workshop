@@ -63,7 +63,7 @@ func main() {
                 }
 
                 // Send 100 messages with varying priorities to the queue
-                for j := 1; j <= 2; j++ {
+                for j := 1; j <= 1; j++ {
                     body := fmt.Sprintf("Message %d for %s", j, queueName)
                     priority := byte(j % 10) // Assign a priority between 0 and 9
 
@@ -83,7 +83,7 @@ func main() {
                     }
                 }
 
-                fmt.Printf("Goroutine %d: Sent 100 messages to %s\n", g, queueName)
+                fmt.Printf("Goroutine %d: Sent 1 message to %s\n", g, queueName)
             }
         }(g)
     }
