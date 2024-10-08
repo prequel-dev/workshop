@@ -25,4 +25,6 @@ done
 
 kubectl -n rabbitmq delete pod my-rabbitmq-cluster-server-0 my-rabbitmq-cluster-server-1 --force
 
+kubectl -n rabbitmq delete job $JOB_NAME
+
 echo "Trigger completed"
