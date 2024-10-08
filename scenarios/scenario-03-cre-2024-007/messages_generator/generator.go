@@ -26,9 +26,17 @@ func main() {
 	}
 	defer conn.Close()
 
-	// Number of Goroutines to use
-	queuesPerGoroutine := totalQueues / numGoroutines / totalJobs
-	jobOffset := jobNumber * totalQueues / totalJobs
+	queuesPerJob := totalQueues / totalJobs
+	startQueue := jobNumber*queuesPerJob + 1
+	endQueue := (jobNumber + 1) * queuesPerJob
+
+	// Handle any remaining queues in the last job
+	if jobNumber == totalJobs-1 {
+		endQueue = totalQueues
+	}
+
+	queuesToProcess := endQueue - startQueue + 1
+	queuesPerGoroutine := queuesToProcess / numGoroutines
 
 	var wg sync.WaitGroup
 
@@ -45,17 +53,22 @@ func main() {
 			defer ch.Close()
 
 			// Calculate the range of queues for this Goroutine
-			startQueue := g*queuesPerGoroutine + 1 + jobOffset
-			endQueue := (g+1)*queuesPerGoroutine + jobOffset
+			goroutineStartQueue := startQueue + g*queuesPerGoroutine
+			goroutineEndQueue := goroutineStartQueue + queuesPerGoroutine - 1
 
-			fmt.Printf("Generating %d queues (%d through %d)\n", queuesPerGoroutine, startQueue, endQueue)
+			// Handle any remaining queues in the last Goroutine
+			if g == numGoroutines-1 {
+				goroutineEndQueue = endQueue
+			}
+
+			fmt.Printf("Generating %d queues (%d through %d)\n", queuesPerGoroutine, goroutineStartQueue, goroutineEndQueue)
 
 			// Handle any remaining queues in the last Goroutine
 			if g == numGoroutines-1 {
 				endQueue = totalQueues
 			}
 
-			for i := startQueue; i <= endQueue; i++ {
+			for i := goroutineStartQueue; i <= goroutineEndQueue; i++ {
 				queueName := fmt.Sprintf("pq%d", i)
 
 				// Declare a durable priority queue
@@ -74,7 +87,7 @@ func main() {
 					continue
 				}
 
-				totalMessages := 5
+				totalMessages := 1
 
 				// Send 100 messages with varying priorities to the queue
 				for j := 1; j <= totalMessages; j++ {
