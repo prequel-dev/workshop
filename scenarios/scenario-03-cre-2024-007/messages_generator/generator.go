@@ -13,7 +13,7 @@ import (
 var (
 	address       = envz.MustEnv("RMQ_ADDRESS", "localhost:5672")
 	totalQueues   = envz.MustEnv("RMQ_QUEUES", 4000)
-	numGoroutines = envz.MustEnv("GOROUTINES", 32)
+	numGoroutines = envz.MustEnv("GOROUTINES", 1)
 	jobNumber     = envz.MustEnv("JOB_NUMBER", 0)
 	totalJobs     = envz.MustEnv("JOB_TOTAL", 10)
 )
@@ -27,8 +27,7 @@ func main() {
 	defer conn.Close()
 
 	// Number of Goroutines to use
-	queuesPerGoroutine := totalQueues / numGoroutines
-
+	queuesPerGoroutine := totalQueues / numGoroutines / totalJobs
 	jobOffset := jobNumber * totalQueues / totalJobs
 
 	var wg sync.WaitGroup
@@ -48,6 +47,8 @@ func main() {
 			// Calculate the range of queues for this Goroutine
 			startQueue := g*queuesPerGoroutine + 1 + jobOffset
 			endQueue := (g+1)*queuesPerGoroutine + jobOffset
+
+			fmt.Printf("Generating %d queues (%d through %d)\n", queuesPerGoroutine, startQueue, endQueue)
 
 			// Handle any remaining queues in the last Goroutine
 			if g == numGoroutines-1 {
@@ -73,8 +74,10 @@ func main() {
 					continue
 				}
 
+				totalMessages := 5
+
 				// Send 100 messages with varying priorities to the queue
-				for j := 1; j <= 1; j++ {
+				for j := 1; j <= totalMessages; j++ {
 					body := fmt.Sprintf("Message %d for %s", j, queueName)
 					priority := byte(j % 10) // Assign a priority between 0 and 9
 
@@ -94,7 +97,7 @@ func main() {
 					}
 				}
 
-				fmt.Printf("Goroutine %d: Sent 1 message to %s\n", g, queueName)
+				fmt.Printf("Goroutine %d: Sent %d message to %s\n", g, totalMessages, queueName)
 			}
 		}(g)
 	}
