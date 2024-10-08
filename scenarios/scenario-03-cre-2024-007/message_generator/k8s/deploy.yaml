@@ -3,8 +3,8 @@ kind: Job
 metadata:
   name: messages-generator-job
 spec:
-  completions: 5
-  parallelism: 5
+  completions: 10
+  parallelism: 10
   template:
     metadata:
       labels:
@@ -18,4 +18,4 @@ spec:
         - name: RMQ_ADDRESS
           value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5672"
         - name: RMQ_QUEUES
-          value: 1000
+          value: 400
