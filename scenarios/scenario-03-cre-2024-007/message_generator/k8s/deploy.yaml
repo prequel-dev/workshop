@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messages-generator-deployment
+spec:
+  selector:
+    matchLabels:
+      app: messages-generator-deployment
+  template:
+    metadata:
+      labels:
+        app: messages-generator-deployment
+    spec:
+      containers:
+      - name: messages-generator
+        image: public.ecr.aws/prequel-dev/workshop/messages-generator:latest

@@ -17,8 +17,8 @@ func main() {
     defer conn.Close()
 
     // Number of Goroutines to use
-    numGoroutines := 16
-    totalQueues := 2000
+    numGoroutines := 32
+    totalQueues := 4000
     queuesPerGoroutine := totalQueues / numGoroutines
 
     var wg sync.WaitGroup
