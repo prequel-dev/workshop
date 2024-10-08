@@ -18,7 +18,7 @@ func main() {
 
     // Number of Goroutines to use
     numGoroutines := 16
-    totalQueues := 100000
+    totalQueues := 2000
     queuesPerGoroutine := totalQueues / numGoroutines
 
     var wg sync.WaitGroup

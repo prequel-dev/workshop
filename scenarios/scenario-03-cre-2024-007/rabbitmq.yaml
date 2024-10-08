@@ -1,7 +1,7 @@
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
-  name: import-definitions-v4
+  name: my-rabbitmq-cluster
 spec:
   replicas: 2
   resources:
