@@ -78,11 +78,12 @@ Question:
 
 ### Step 3: Trigger problem (10 minutes)
 
-Now let's recreate the problem associated with CRE-2024-007.
+Now let's recreate the problem associated with CRE-2024-007. This will take about 2 minutes.
 
 ```bash
 $ time ./trigger.sh 
-Deploying the Job...
+Error from server (NotFound): jobs.batch "messages-generator-job" not found
+Deploying the problem trigger job...
 job.batch/messages-generator-job created
 Waiting for the Job 'messages-generator-job' to complete...
 Job 'messages-generator-job' is still running. Checking again in 5 seconds...
@@ -102,23 +103,31 @@ Job 'messages-generator-job' is still running. Checking again in 5 seconds...
 Job 'messages-generator-job' is still running. Checking again in 5 seconds...
 Job 'messages-generator-job' is still running. Checking again in 5 seconds...
 Job 'messages-generator-job' is still running. Checking again in 5 seconds...
-Job 'messages-generator-job' is still running. Checking again in 5 seconds...
-Job 'messages-generator-job' is still running. Checking again in 5 seconds...
-Job 'messages-generator-job' is still running. Checking again in 5 seconds...
-Job 'messages-generator-job' completed at 2024-10-08T20:19:32Z.
+Job 'messages-generator-job' completed at 2024-10-09T02:34:42Z.
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 pod "my-rabbitmq-cluster-server-0" force deleted
 pod "my-rabbitmq-cluster-server-1" force deleted
+job.batch "messages-generator-job" deleted
 Trigger completed
 
-real	1m48.059s
-user	0m6.544s
-sys	0m1.090s
+real	1m32.636s
+user	0m6.234s
+sys	0m0.995s
 ```
 
-Questions: 
+Questions:
 
-* Monit
+* What RabbitMQ metrics in Prometheus are useful in understanding what is happening?
+
+```bash
+rabbitmq_connection_incoming_bytes_total{namespace="rabbitmq"}
+```
+
+```bash
+rabbitmq_erlang_processes_used{namespace="rabbitmq"}
+```
+
+* What other metrics might be helpful?
 
 ### Step 4: Use Prequel to detect problem (1 minute)
 
@@ -184,4 +193,6 @@ Click on How To Mitigate -> Details. What are the recommended changes to fix thi
 
 ## Key Takeaways
 
-* Stuff 
+* Key takeaway 1
+* Key takeaway 2
+* Key takeaway 3
