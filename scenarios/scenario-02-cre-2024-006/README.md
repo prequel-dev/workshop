@@ -115,7 +115,7 @@ configmap/kafka-metrics unchanged
 Monitor Kubernetes events to wait until the entity operator is successfully re-created. This can take a few minutes for the Strimzi Kafka operator to reconcile the configuration change. 
 
 ```bash
-$ kubectl -n strimzi get events -w -A | grep SuccessfulCreate
+$ kubectl -n strimzi get events -w -A | grep -E 'strimzi.*SuccessfulCreate'
 strimzi      0s          Normal    SuccessfulCreate    replicaset/my-cluster-entity-operator-67cb786575   Created pod: my-cluster-entity-operator-67cb786575-46888
 ```
 
@@ -160,6 +160,70 @@ Questions:
 ```bash
 k8(container_name="topic-operator", event=STARTUP) | log(pattern="io.vertx.core.VertxException: Thread blocked", window=90s)
 ```
+
+#### Problem Explanation
+
+Note the following details in the `topic-operator` in the Kafka `entity-operator`:
+
+```bash
+$ kubectl -n strimzi logs deployments/my-cluster-entity-operator -c topic-operator
+2024-10-09 17:38:09,11626 INFO  [vert.x-eventloop-thread-0] Session:205 - Starting
+2024-10-09 17:38:12,21498 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 2897 ms, time limit is 2000 ms
+2024-10-09 17:38:12,71510 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 3897 ms, time limit is 2000 ms
+2024-10-09 17:38:13,71506 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 4897 ms, time limit is 2000 ms
+2024-10-09 17:38:14,91513 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 5897 ms, time limit is 2000 ms
+io.vertx.core.VertxException: Thread blocked
+	at java.security.MessageDigest.digest(MessageDigest.java:405) ~[?:?]
+	at com.sun.crypto.provider.HmacCore.engineDoFinal(HmacCore.java:227) ~[?:?]
+	at javax.crypto.Mac.doFinal(Mac.java:581) ~[?:?]
+	at javax.crypto.Mac.doFinal(Mac.java:624) ~[?:?]
+	at com.sun.crypto.provider.PBKDF2KeyImpl.deriveKey(PBKDF2KeyImpl.java:192) ~[?:?]
+	at com.sun.crypto.provider.PBKDF2KeyImpl.<init>(PBKDF2KeyImpl.java:117) ~[?:?]
+	at com.sun.crypto.provider.PBKDF2Core.engineGenerateSecret(PBKDF2Core.java:69) ~[?:?]
+	at com.sun.crypto.provider.PBES2Core.engineInit(PBES2Core.java:280) ~[?:?]
+	at com.sun.crypto.provider.PBES2Core.engineInit(PBES2Core.java:307) ~[?:?]
+	at javax.crypto.Cipher.implInit(Cipher.java:847) ~[?:?]
+	at javax.crypto.Cipher.chooseProvider(Cipher.java:901) ~[?:?]
+	at javax.crypto.Cipher.init(Cipher.java:1576) ~[?:?]
+	at javax.crypto.Cipher.init(Cipher.java:1507) ~[?:?]
+	at sun.security.pkcs12.PKCS12KeyStore.lambda$engineLoad$1(PKCS12KeyStore.java:2111) ~[?:?]
+	at sun.security.pkcs12.PKCS12KeyStore$$Lambda$253/0x00000008402d0c40.tryOnce(Unknown Source) ~[?:?]
+	at sun.security.pkcs12.PKCS12KeyStore$RetryWithZero.run(PKCS12KeyStore.java:276) ~[?:?]
+	at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2106) ~[?:?]
+	at sun.security.util.KeyStoreDelegator.engineLoad(KeyStoreDelegator.java:243) ~[?:?]
+	at java.security.KeyStore.load(KeyStore.java:1479) ~[?:?]
+	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory$FileBasedStore.load(DefaultSslEngineFactory.java:372) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory$FileBasedStore.<init>(DefaultSslEngineFactory.java:347) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory.createKeystore(DefaultSslEngineFactory.java:297) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory.configure(DefaultSslEngineFactory.java:161) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.security.ssl.SslFactory.instantiateSslEngineFactory(SslFactory.java:140) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.security.ssl.SslFactory.configure(SslFactory.java:97) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.network.SslChannelBuilder.configure(SslChannelBuilder.java:73) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.network.ChannelBuilders.create(ChannelBuilders.java:192) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.common.network.ChannelBuilders.clientChannelBuilder(ChannelBuilders.java:81) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.clients.ClientUtils.createChannelBuilder(ClientUtils.java:105) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.clients.admin.KafkaAdminClient.createInternal(KafkaAdminClient.java:524) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.clients.admin.KafkaAdminClient.createInternal(KafkaAdminClient.java:485) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.clients.admin.Admin.create(Admin.java:134) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at org.apache.kafka.clients.admin.AdminClient.create(AdminClient.java:39) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
+	at io.strimzi.operator.topic.Session.start(Session.java:210) ~[io.strimzi.topic-operator-0.32.0.jar:0.32.0]
+	at io.vertx.core.impl.DeploymentManager.lambda$doDeploy$5(DeploymentManager.java:196) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
+	at io.vertx.core.impl.DeploymentManager$$Lambda$222/0x00000008402b0040.handle(Unknown Source) ~[?:?]
+	at io.vertx.core.impl.ContextInternal.dispatch(ContextInternal.java:264) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
+	at io.vertx.core.impl.ContextInternal.dispatch(ContextInternal.java:246) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
+	at io.vertx.core.impl.EventLoopContext.lambda$runOnContext$0(EventLoopContext.java:43) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
+	at io.vertx.core.impl.EventLoopContext$$Lambda$223/0x00000008402b0c40.run(Unknown Source) ~[?:?]
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:174) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:167) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:503) ~[io.netty.netty-transport-4.1.77.Final.jar:4.1.77.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:995) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
+	at java.lang.Thread.run(Thread.java:829) ~[?:?]
+```
+
+The main event loop is blocked. As a result, the `topic-operator` is unable to monitor and update Kafka topics.
 
 ### Step 5: Implement mitigation (2 minutes)
 

@@ -93,7 +93,7 @@ Generating 400 total traces using 4 workers...
 2024/10/07 18:38:27 Post "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:14268/api/traces": dial tcp 10.119.252.93:14268: connect: connection refused
 ```
 
-Delete the deployment when you see the above EOF and connection refused errors.
+This may take a few minutes to complete. Delete the deployment when you see the above EOF and connection refused errors.
 
 ```bash
 $ k -n monitoring delete deployments.apps traces-generator-deployment 
@@ -111,7 +111,7 @@ Use Prometheus to monitor the metrics for the OpenTelemetry Collector container 
 
 **Hints:** 
 
-Suggested metrics for Alertmanager rules:
+Suggested metrics to explore:
 
 ```bash
 container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentelemetry-collector-k8s:0.111.0"}
