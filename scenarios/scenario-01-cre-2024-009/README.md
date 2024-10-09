@@ -82,9 +82,10 @@ This metric is useful for monitoring memory usage trends and potential memory pr
 
 Now let's generate traces and send them to the OpenTelemetry Collector. In your terminal, run the following commands:
 
-Ensure you are in the scenario folder:
+Change directories to the scenario folder in case:
 
 ```bash
+$ cd /home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
 $ pwd
 /home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
 ```
