@@ -19,7 +19,7 @@ spec:
         - name: RMQ_ADDRESS
           value: "my-rabbitmq-cluster.rabbitmq.svc.cluster.local:5672"
         - name: RMQ_QUEUES
-          value: "1500"
+          value: "1000"
         - name: JOB_NUMBER
           valueFrom:
             fieldRef:
