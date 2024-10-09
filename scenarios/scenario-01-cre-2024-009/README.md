@@ -135,6 +135,9 @@ Click on the most recent detection and explore the detection data and graph.
 k8(image_url="docker.io/otel/opentelemetry-collector*", event=OOMKilled)
 ```
 
+#### Problem Explanation
+
+
 ### Step 4: Implement mitigation (10 minutes)
 
 Click on How To Mitigate -> Details. Then edit the OpenTelemetry configuration and apply the recommended Prequel mitigation.

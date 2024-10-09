@@ -205,6 +205,6 @@ topic-01                                                                        
 
 ## Key Takeaways
 
-* Some reliability problems are challenging to detect using just metrics
+* Reliability problems can be challenging to detect using just metrics
 * Creating detections that join data across metrics, events, and logs can enable the creation of detections with low signal-to-noise ratios
 * Relability intelligence can reduce the time to learn about known failure

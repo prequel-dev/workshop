@@ -56,13 +56,15 @@ This scenario explores CRE-2024-007, a [known issue](https://github.com/rabbitmq
 
 Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.classroom.superorbital.io/ (change `XX` to your lab number found on your lab worksheet printout).
 
-Use Prometheus to visualize a few relevant metrics to monitor the health of your RabbitMQ cluster.
+Use Prometheus to visualize and explore RabbitMQ metrics. For example, start with:
 
 ```
 rabbitmq_alarms_memory_used_watermark{namespace="rabbitmq"}
 ```
 
 ![RabbitMQ alarm metrics](./images/rabbitmq-alarm.png)
+
+What does this metric measure?
 
 Just like any other application, RabbitMQ uses memory (RAM) to perform its operations. It stores messages in memory, especially when they are waiting in queues to be processed. However, memory is a limited resource, and if RabbitMQ uses too much memory, it can negatively impact the overall system performance or even cause the system to run out of memory.
 
@@ -181,8 +183,6 @@ $ kubectl -n rabbitmq logs my-rabbitmq-cluster-server-0 -f
 2024-10-08 20:56:22.845471+00:00 [info] <0.518.0> Recovering 872 queues of type rabbit_classic_queue took 312609ms
 ```
 
-#### What is happening?
-
 The RabbitMQ cluster is processing a large number of persistent mirrored queues at boot. There are so many that the underlying Erlang process, `Mnesia`, is reporting that it is overloaded while recoving these queues on boot. During this period, RabbitMQ is unable to process any new messages, which can lead to outages.
 
 Note that there are no RabbitMQ VM threshold watermark alerts.
@@ -191,8 +191,131 @@ Note that there are no RabbitMQ VM threshold watermark alerts.
 
 Click on How To Mitigate -> Details. What are the recommended changes to fix this problem?
 
+Run the following `diff -y` command to see the recommended mitigations we're about to apply.
+
+```bash
+$ diff -y rabbitmq-00.yaml rabbitmq-01.yaml 
+apiVersion: rabbitmq.com/v1beta1        apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster                   kind: RabbitmqCluster
+metadata:                               metadata:
+  name: my-rabbitmq-cluster               name: my-rabbitmq-cluster
+spec:                                   spec:
+  replicas: 2                       |     replicas: 4
+  resources:                        <
+    requests:                       <
+      memory: 512Mi                 <
+      cpu: 50m                      <
+    limits:                         <
+      memory: 4Gi                   <
+      cpu: 200m                     <
+```
+
+Question:
+
+* How would these changes help resolve the problem?
+
+Run the following commands to apply the recommended mitigation.
+
+```bash
+$ kubectl -n rabbitmq delete -f ./rabbitmq-00.yaml
+rabbitmqcluster.rabbitmq.com "my-rabbitmq-cluster" deleted
+$ kubectl -n rabbitmq apply -f ./rabbitmq-01.yaml 
+rabbitmqcluster.rabbitmq.com/my-rabbitmq-cluster created
+```
+
+Monitor the creation of the new cluster. Once the cluster pods enter the ready state, tail the log files of one of the clusters to see if the problem with `Mnesia` happens again.
+
+```bash
+$ k -n rabbitmq get pods -o wide -w
+NAME                                                              READY   STATUS    RESTARTS   AGE   IP            NODE                                 NOMINATED NODE   READINESS GATES
+my-rabbitmq-cluster-server-0                                      0/1     Running   0          82s   10.116.4.51   gke-lab-default-pool-4fa5bdf0-v2jq   <none>           <none>
+my-rabbitmq-cluster-server-1                                      0/1     Running   0          81s   10.116.8.57   gke-lab-default-pool-6a8caa23-mpx1   <none>           <none>
+my-rabbitmq-cluster-server-2                                      0/1     Running   0          81s   10.116.6.32   gke-lab-default-pool-6a8caa23-v4t0   <none>           <none>
+my-rabbitmq-cluster-server-3                                      0/1     Running   0          81s   10.116.9.38   gke-lab-default-pool-4fa5bdf0-bljk   <none>           <none>
+my-rabbitmq-rabbitmq-cluster-operator-59894fb74c-j569w            1/1     Running   0          32h   10.116.2.28   gke-lab-default-pool-a2454db7-qvgp   <none>           <none>
+my-rabbitmq-rabbitmq-messaging-topology-operator-54d5dcf5fzjbch   1/1     Running   0          32h   10.116.7.28   gke-lab-default-pool-a2454db7-wvc9   <none>           <none>
+my-rabbitmq-cluster-server-1                                      1/1     Running   0          82s   10.116.8.57   gke-lab-default-pool-6a8caa23-mpx1   <none>           <none>
+my-rabbitmq-cluster-server-0                                      1/1     Running   0          83s   10.116.4.51   gke-lab-default-pool-4fa5bdf0-v2jq   <none>           <none>
+my-rabbitmq-cluster-server-2                                      1/1     Running   0          99s   10.116.6.32   gke-lab-default-pool-6a8caa23-v4t0   <none>           <none>
+my-rabbitmq-cluster-server-3                                      1/1     Running   0          102s   10.116.9.38   gke-lab-default-pool-4fa5bdf0-bljk   <none>           <none>
+```
+
+```bash
+kubectl -n rabbitmq logs my-rabbitmq-cluster-server-1 -f
+2024-10-09 02:57:21.449927+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.4211663329.4243849217.73908>}} from <0.228.0> to <0.5050.0> in an old incarnation (1728442498) of this node (1728442635)
+2024-10-09 02:57:21.449927+00:00 [erro] <0.228.0> 
+2024-10-09 02:57:21.449927+00:00 [erro] <0.228.0> 
+2024-10-09 02:57:21.449977+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.4211663329.4243849217.73908>}} from <0.228.0> to <0.3845.0> in an old incarnation (1728442498) of this node (1728442635)
+2024-10-09 02:57:21.449977+00:00 [erro] <0.228.0> 
+2024-10-09 02:57:21.449977+00:00 [erro] <0.228.0> 
+2024-10-09 02:57:21.450001+00:00 [erro] <0.228.0> Discarding message {'$gen_cast',{force_event_refresh,#Ref<0.4211663329.4243849217.73908>}} from <0.228.0> to <0.3732.0> in an old incarnation (1728442498) of this node (1728442635)
+2024-10-09 02:57:21.450001+00:00 [erro] <0.228.0> 
+2024-10-09 02:57:21.450001+00:00 [erro] <0.228.0> 
+2024-10-09 02:57:21.566968+00:00 [info] <0.651.0> Making sure data directory '/bitnami/rabbitmq/mnesia/rabbit@my-rabbitmq-cluster-server-1.my-rabbitmq-cluster-nodes.rabbitmq/msg_stores/vhosts/628WB79CIFDYO9LJI6DKMI09L' for vhost '/' exists
+2024-10-09 02:57:21.628743+00:00 [info] <0.651.0> Starting message stores for vhost '/'
+2024-10-09 02:57:21.629335+00:00 [info] <0.655.0> Message store "628WB79CIFDYO9LJI6DKMI09L/msg_store_transient": using rabbit_msg_store_ets_index to provide index
+2024-10-09 02:57:21.631593+00:00 [info] <0.651.0> Started message store of type transient for vhost '/'
+2024-10-09 02:57:21.633076+00:00 [info] <0.659.0> Message store "628WB79CIFDYO9LJI6DKMI09L/msg_store_persistent": using rabbit_msg_store_ets_index to provide index
+2024-10-09 02:57:21.634371+00:00 [warn] <0.659.0> Message store "628WB79CIFDYO9LJI6DKMI09L/msg_store_persistent": rebuilding indices from scratch
+2024-10-09 02:57:24.980082+00:00 [info] <0.651.0> Started message store of type persistent for vhost '/'
+2024-10-09 02:57:28.307685+00:00 [info] <0.651.0> Recovering 249 queues of type rabbit_classic_queue took 6737ms
+2024-10-09 02:57:28.307768+00:00 [info] <0.651.0> Recovering 0 queues of type rabbit_quorum_queue took 0ms
+2024-10-09 02:57:28.307797+00:00 [info] <0.651.0> Recovering 0 queues of type rabbit_stream_queue took 0ms
+2024-10-09 02:57:28.331166+00:00 [info] <0.651.0> Mirrored queue 'pq3' in vhost '/': Adding mirror on node 'rabbit@my-rabbitmq-cluster-server-1.my-rabbitmq-cluster-nodes.rabbitmq': <0.7169.0>
+2024-10-09 02:57:28.332015+00:00 [info] <0.651.0> Mirrored queue 'pq2' in vhost '/': Adding mirror on node 'rabbit@my-rabbitmq-cluster-server-1.my-rabbitmq-cluster-nodes.rabbitmq': <0.7173.0>
+2024-10-09 02:57:28.332719+00:00 [info] <0.651.0> Mirrored queue 'pq1' in vhost '/': Adding mirror on node 'rabbit@my-rabbitmq-cluster-server-1.my-rabbitmq-cluster-nodes.rabbitmq': <0.7177.0>
+2024-10-09 02:57:28.333389+00:00 [info] <0.228.0> Running boot step empty_db_check defined by app rabbit
+2024-10-09 02:57:28.333462+00:00 [info] <0.228.0> Will not seed default virtual host and user: have definitions to load...
+2024-10-09 02:57:28.333501+00:00 [info] <0.228.0> Running boot step rabbit_looking_glass defined by app rabbit
+2024-10-09 02:57:28.333543+00:00 [info] <0.228.0> Running boot step rabbit_core_metrics_gc defined by app rabbit
+2024-10-09 02:57:28.333869+00:00 [info] <0.228.0> Running boot step background_gc defined by app rabbit
+2024-10-09 02:57:28.334251+00:00 [info] <0.228.0> Running boot step routing_ready defined by app rabbit
+2024-10-09 02:57:28.334347+00:00 [info] <0.228.0> Running boot step pre_flight defined by app rabbit
+2024-10-09 02:57:28.334415+00:00 [info] <0.228.0> Running boot step notify_cluster defined by app rabbit
+2024-10-09 02:57:28.334459+00:00 [info] <0.228.0> Running boot step networking defined by app rabbit
+2024-10-09 02:57:28.334537+00:00 [info] <0.228.0> Running boot step definition_import_worker_pool defined by app rabbit
+2024-10-09 02:57:28.334680+00:00 [info] <0.563.0> Starting worker pool 'definition_import_pool' with 2 processes in it
+2024-10-09 02:57:28.335282+00:00 [info] <0.228.0> Running boot step cluster_name defined by app rabbit
+2024-10-09 02:57:28.335373+00:00 [info] <0.228.0> Setting cluster name to 'my-rabbitmq-cluster' as configured
+2024-10-09 02:57:28.338101+00:00 [info] <0.612.0> rabbit on node 'rabbit@my-rabbitmq-cluster-server-0.my-rabbitmq-cluster-nodes.rabbitmq' up
+2024-10-09 02:57:28.343261+00:00 [info] <0.228.0> Running boot step direct_client defined by app rabbit
+2024-10-09 02:57:28.348287+00:00 [info] <0.228.0> Running boot step rabbit_management_load_definitions defined by app rabbitmq_management
+2024-10-09 02:57:28.349571+00:00 [info] <0.7192.0> Resetting node maintenance status
+2024-10-09 02:57:28.397015+00:00 [info] <0.612.0> rabbit on node 'rabbit@my-rabbitmq-cluster-server-2.my-rabbitmq-cluster-nodes.rabbitmq' up
+2024-10-09 02:57:28.411162+00:00 [info] <0.612.0> rabbit on node 'rabbit@my-rabbitmq-cluster-server-3.my-rabbitmq-cluster-nodes.rabbitmq' up
+2024-10-09 02:57:28.436332+00:00 [info] <0.7289.0> Management plugin: HTTP (non-TLS) listener started on port 15672
+2024-10-09 02:57:28.436733+00:00 [info] <0.7317.0> Statistics database started.
+2024-10-09 02:57:28.436960+00:00 [info] <0.7316.0> Starting worker pool 'management_worker_pool' with 3 processes in it
+2024-10-09 02:57:28.445026+00:00 [info] <0.7333.0> Peer discovery: node cleanup is disabled
+2024-10-09 02:57:28.448359+00:00 [info] <0.7341.0> Prometheus metrics: HTTP (non-TLS) listener started on port 15692
+2024-10-09 02:57:28.449078+00:00 [info] <0.7192.0> Applying definitions from file at '/etc/rabbitmq/definitions.json'
+2024-10-09 02:57:28.449139+00:00 [info] <0.7192.0> Asked to import definitions. Acting user: rmq-internal
+2024-10-09 02:57:28.449416+00:00 [info] <0.7192.0> Importing concurrently 1 users...
+2024-10-09 02:57:28.454509+00:00 [info] <0.7185.0> Successfully changed password for user 'guest'
+2024-10-09 02:57:28.454576+00:00 [info] <0.7185.0> Successfully set user tags for user 'guest' to [administrator]
+2024-10-09 02:57:28.454716+00:00 [info] <0.7192.0> Importing concurrently 1 vhosts...
+2024-10-09 02:57:28.462451+00:00 [info] <0.7192.0> Importing concurrently 1 permissions...
+2024-10-09 02:57:28.466076+00:00 [info] <0.7185.0> Successfully set permissions for 'guest' in virtual host '/' to '.*', '.*', '.*'
+2024-10-09 02:57:28.466404+00:00 [info] <0.7192.0> Importing concurrently 1 exchanges...
+2024-10-09 02:57:28.467932+00:00 [info] <0.7192.0> Importing sequentially 2 global runtime parameters...
+2024-10-09 02:57:28.475427+00:00 [info] <0.7192.0> Importing sequentially 1 policies...
+2024-10-09 02:57:28.479190+00:00 [info] <0.7192.0> Importing concurrently 3 queues...
+2024-10-09 02:57:28.484416+00:00 [info] <0.7192.0> Importing concurrently 2 bindings...
+2024-10-09 02:57:28.485061+00:00 [info] <0.7192.0> Ready to start client connection listeners
+2024-10-09 02:57:28.490990+00:00 [info] <0.7395.0> started TCP listener on [::]:5672
+ completed with 6 plugins.
+2024-10-09 02:57:28.645146+00:00 [info] <0.7192.0> Server startup complete; 6 plugins started.
+2024-10-09 02:57:28.645146+00:00 [info] <0.7192.0>  * rabbitmq_prometheus
+2024-10-09 02:57:28.645146+00:00 [info] <0.7192.0>  * rabbitmq_peer_discovery_k8s
+2024-10-09 02:57:28.645146+00:00 [info] <0.7192.0>  * rabbitmq_peer_discovery_common
+2024-10-09 02:57:28.645146+00:00 [info] <0.7192.0>  * rabbitmq_management
+2024-10-09 02:57:28.645146+00:00 [info] <0.7192.0>  * rabbitmq_web_dispatch
+2024-10-09 02:57:28.645146+00:00 [info] <0.7192.0>  * rabbitmq_management_agent
+2024-10-09 02:57:50.515748+00:00 [info] <0.612.0> rabbit on node 'rabbit@my-rabbitmq-cluster-server-0.my-rabbitmq-cluster-nodes.rabbitmq' up
+```
+
 ## Key Takeaways
 
-* Key takeaway 1
-* Key takeaway 2
-* Key takeaway 3
+* Some problems are very challenging to detect using metrics
+* Detecting a problem early can save hours of customer down time
+* RabbitMQ/Erlang expertise is difficult to find and develop. Reliability intelligence can fill the gap.
