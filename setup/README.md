@@ -69,7 +69,12 @@ Ensure that the latest rules package is installed on all of the clusters.
 
 ### scenario-01-cre-2024-009
 
-There is no additional setup.
+Ensure that the Jaeger receiver is configured to use the pod IP address:
+
+```bash
+thrift_http:
+  endpoint: ${env:MY_POD_IP}:14268
+```
 
 ### scenario-02-cre-2024-006
 
