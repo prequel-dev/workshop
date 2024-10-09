@@ -82,6 +82,13 @@ This metric is useful for monitoring memory usage trends and potential memory pr
 
 Now let's generate traces and send them to the OpenTelemetry Collector. In your terminal, run the following commands:
 
+Ensure you are in the scenario folder:
+
+```bash
+$ pwd
+/home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
+```
+
 ```bash
 $ cd ./trace_generator/k8s
 $ kubectl -n monitoring apply -f ./deploy.yaml
