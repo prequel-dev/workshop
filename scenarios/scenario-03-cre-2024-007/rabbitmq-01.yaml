@@ -1,0 +1,27 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: my-rabbitmq-cluster
+spec:
+  replicas: 4
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+            - name: rabbitmq
+              image: docker.io/bitnami/rabbitmq:3.9.14-debian-10-r15
+              volumeMounts:
+              - mountPath: /etc/rabbitmq/definitions.json
+                subPath: definitions.json
+                name: definitions
+            volumes:
+            - name: definitions
+              configMap:
+                name: definitions
+  rabbitmq:
+    additionalConfig: |
+      vm_memory_high_watermark.absolute = 4Gi
+      loopback_users.guest = false
+      load_definitions = /etc/rabbitmq/definitions.json
