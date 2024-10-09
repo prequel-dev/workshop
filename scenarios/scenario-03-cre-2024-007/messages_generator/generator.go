@@ -12,8 +12,8 @@ import (
 
 var (
 	address       = envz.MustEnv("RMQ_ADDRESS", "localhost:5672")
-	totalQueues   = envz.MustEnv("RMQ_QUEUES", 4000)
-	numGoroutines = envz.MustEnv("GOROUTINES", 1)
+	totalQueues   = envz.MustEnv("RMQ_QUEUES", 2000)
+	numGoroutines = envz.MustEnv("GOROUTINES", 16)
 	jobNumber     = envz.MustEnv("JOB_NUMBER", 0)
 	totalJobs     = envz.MustEnv("JOB_TOTAL", 10)
 )
