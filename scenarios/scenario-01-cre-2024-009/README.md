@@ -74,6 +74,10 @@ container_memory_rss{namespace="monitoring", container="opentelemetry-collector"
 
 ![Monitor OTel Collector memory](./images/otel-rss.png)
 
+The metric `container_memory_rss` measures the Resident Set Size (RSS), which is the amount of memory that a container has in RAM. Specifically, it shows the non-swapped physical memory used by the container, which is a critical indicator of how much memory the container is actively using from the available RAM. Memory resource limits measure RSS usage to determine whether a Kubernetes resource has exceeded its limit.
+
+This metric is useful for monitoring memory usage trends and potential memory pressure.
+
 ### Step 2: Trigger problem (2 minutes)
 
 Now let's generate traces and send them to the OpenTelemetry Collector. In your terminal, run the following commands:
@@ -137,6 +141,23 @@ k8(image_url="docker.io/otel/opentelemetry-collector*", event=OOMKilled)
 
 #### Problem Explanation
 
+Note the following log lines in the OpenTelemetry Collector:
+
+```bash
+$ kubectl -n monitoring logs deployments/otel-collector-opentelemetry-collector
+2024-10-09T17:13:08.563Z	warn	grpc@v1.67.1/clientconn.go:1379	[core] [Channel #1 SubChannel #8]grpc: addrConn.createTransport failed to connect to {Addr: "127.0.0.1:4319", ServerName: "localhost:4319", }. Err: connection error: desc = "transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused"	{"grpc_log": true}
+2024-10-09T17:13:08.563Z	warn	grpc@v1.67.1/clientconn.go:1379	[core] [Channel #1 SubChannel #8]grpc: addrConn.createTransport failed to connect to {Addr: "[::1]:4319", ServerName: "localhost:4319", }. Err: connection error: desc = "transport: Error while dialing: dial tcp [::1]:4319: connect: cannot assign requested address"	{"grpc_log": true}
+2024-10-09T17:13:10.510Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "15.940329642s"}
+2024-10-09T17:13:12.954Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "42.666106117s"}
+2024-10-09T17:13:13.541Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "16.483723636s"}
+2024-10-09T17:13:15.232Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "20.515484291s"}
+2024-10-09T17:13:15.660Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "14.58537921s"}
+2024-10-09T17:13:19.846Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "17.095877718s"}
+2024-10-09T17:13:20.086Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "31.629400874s"}
+2024-10-09T17:13:21.504Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "16.520110222s"}
+```
+
+The OpenTelemetry Collector receives traces from your cluster and forwards it on to a destination source, such as Prometheus. The logs above indicate that the collector is unable to forward the data it is receiving. This data builds up in the collector's memory, eventually consuming more than its resource limit. When this resource limit is exceeded, the container is terminated by Linux. This container status event shows up in Kuberetes as an `OOMKilling` event.
 
 ### Step 4: Implement mitigation (10 minutes)
 

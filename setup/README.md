@@ -65,6 +65,8 @@ Check Prometheus metrics to ensure that these service metrics are available.
 
 ## Step 5: Set up the scenarios
 
+Ensure that the latest rules package is installed on all of the clusters.
+
 ### scenario-01-cre-2024-009
 
 There is no additional setup.
