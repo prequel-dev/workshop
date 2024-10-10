@@ -1,0 +1,72 @@
+apiVersion: v1
+data:
+  relay: |
+    exporters:
+      debug: {}
+      otlp:
+        endpoint: localhost:4319
+    extensions:
+      health_check:
+        endpoint: ${env:MY_POD_IP}:13133
+      zpages:
+        endpoint: ${env:MY_POD_IP}:55679
+    processors:
+      batch: {}
+      memory_limiter:
+        check_interval: 5s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+    receivers:
+      jaeger:
+        protocols:
+          thrift_http:
+            endpoint: ${env:MY_POD_IP}:14268
+      otlp:
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: opentelemetry-collector
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - ${env:MY_POD_IP}:8888
+      zipkin:
+        endpoint: ${env:MY_POD_IP}:9411
+    service:
+      extensions:
+      - health_check
+      pipelines:
+        logs:
+          exporters:
+          - otlp
+          processors:
+          - batch
+          - memory_limiter
+          receivers:
+          - otlp
+        metrics:
+          exporters:
+          - otlp
+          processors:
+          - batch
+          - memory_limiter
+          receivers:
+          - otlp
+        traces:
+          exporters:
+          - otlp
+          processors:
+          - batch
+          - memory_limiter
+          receivers:
+          - jaeger
+      telemetry:
+        metrics:
+          address: ${env:MY_POD_IP}:8888
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: monitoring

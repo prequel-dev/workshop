@@ -1,19 +1,22 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: traces-generator-deployment
+  name: traces-generator-job
 spec:
-  selector:
-    matchLabels:
-      app: traces-generator-deployment
   template:
     metadata:
       labels:
-        app: traces-generator-deployment
+        app: traces-generator-job
     spec:
       containers:
       - name: traces-generator
         image: public.ecr.aws/prequel-dev/workshop/traces-generator:latest
         env:
         - name: COLLECTOR_ADDRESS
-          value: "otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:14268"
+          value: "otel-collector.monitoring.svc.cluster.local:14268"
+        - name: TRACES_PER_WORKER
+          value: "50"
+        - name: NUM_WORKERS
+          value: "4"
+      restartPolicy: Never
+  backoffLimit: 0

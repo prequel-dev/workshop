@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+      - args:
+        - --config=/conf/relay.yaml
+        env:
+        - name: MY_POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: GOMEMLIMIT
+          value: 160MiB
+        name: otel-collector
+        image: otel/opentelemetry-collector-k8s:0.111.0
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            memory: 200Mi
+        ports:
+        - containerPort: 4317
+          name: otlp
+          protocol: TCP
+        - containerPort: 13133
+          name: healthcheck
+          protocol: TCP
+        - containerPort: 55679
+          name: zpages
+          protocol: TCP
+        - containerPort: 14268
+          name: jaegerthrift
+          protocol: TCP
+        - containerPort: 8888
+          name: prometheus
+          protocol: TCP
+        - containerPort: 9411
+          name: zipkin
+          protocol: TCP
+        volumeMounts:
+        - name: otel-collector-config
+          mountPath: /conf
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: relay
+            path: relay.yaml
+          name: otel-collector-config
+        name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+spec:
+  selector:
+    app: otel-collector
+  ports:
+  - name: healthcheck
+    protocol: TCP
+    port: 13133
+    targetPort: 13133
+  - name: zpages
+    protocol: TCP
+    port: 55679
+    targetPort: 55679
+  - name: jaegerthrift
+    protocol: TCP
+    port: 14268
+    targetPort: 14268
+  - name: otlp
+    protocol: TCP
+    port: 4317
+    targetPort: 4317
+  - name: prometheus
+    protocol: TCP
+    port: 8888
+    targetPort: 8888
+  - name: zipkin
+    protocol: TCP
+    port: 9411
+    targetPort: 9411
+  type: ClusterIP

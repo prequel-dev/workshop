@@ -20,7 +20,11 @@ import (
 )
 
 var (
-	address = envz.MustEnv("COLLECTOR_ADDRESS", "localhost:14268")
+	address         = envz.MustEnv("COLLECTOR_ADDRESS", "localhost:14268")
+	tracesPerWorker = envz.MustEnv("TRACES_PER_WORKER", 100)
+	numWorkers      = envz.MustEnv("NUM_WORKERS", 4)
+	numAttributes   = envz.MustEnv("NUM_ATTRIBUTES", 1000)
+	sizeAttribute   = envz.MustEnv("SIZE_ATTRIBUTE", 1024*10)
 )
 
 func initTracer() func() {
@@ -77,8 +81,8 @@ func generateTraces(numTraces int, workerID int, wg *sync.WaitGroup) {
 		span.SetAttributes(attribute.Int("iteration", i))
 
 		// Add lots of large tag strings to the span
-		for j := 0; j < 1000; j++ { // Number of attributes to add (adjust as needed)
-			largeString := generateLargeString(1024 * 10) // Size of each attribute value in bytes
+		for j := 0; j < numAttributes; j++ { // Number of attributes to add (adjust as needed)
+			largeString := generateLargeString(sizeAttribute) // Size of each attribute value in bytes
 			span.SetAttributes(attribute.String(fmt.Sprintf("large_attribute_%d", j), largeString))
 		}
 
@@ -101,8 +105,6 @@ func main() {
 	defer shutdown()
 
 	// Number of goroutines (workers) and traces per worker
-	numWorkers := 4
-	tracesPerWorker := 100 //2500           // Adjust the number of traces per worker
 	totalTraces := numWorkers * tracesPerWorker
 
 	fmt.Printf("Generating %d total traces using %d workers...\n", totalTraces, numWorkers)

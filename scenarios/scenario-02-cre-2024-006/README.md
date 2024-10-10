@@ -59,6 +59,14 @@ Let's discover how to add new Kafka topics. Kafka topics are the categories used
 
 The Strimzi Kafka [entity operator](https://strimzi.io/docs/operators/0.28.0/full/configuring#assembly-kafka-entity-operator-str) is used to manage Kafka-related entities in a running Kafka cluster. It contains a user and topic operator. The operators are automatically configured to monitor and manage the topics and users of the Kafka cluster.
 
+Change directories to the scenario folder:
+    
+```bash
+$ cd /home/student/prequel/workshop/scenarios/scenario-02-cre-2024-009
+$ pwd
+/home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
+```
+
 Add a new topic by applying the `topic-00.yaml` configuration file. 
 
 ```bash
