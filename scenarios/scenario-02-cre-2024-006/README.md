@@ -72,7 +72,7 @@ Question:
 Now let's recreate the problem associated with CRE-2024-006.
 
 ```bash
-$ kubectl -n strimzi apply -f ./kafka-metrics-01.yaml
+$ kubectl -n strimzi apply -f ./kafka-metrics-problem.yaml
 kafka.kafka.strimzi.io/my-cluster configured
 configmap/kafka-metrics unchanged
 ```
@@ -235,7 +235,7 @@ Click on How To Mitigate -> Details. What are the recommended changes to fix thi
 Use `diff -y` to see the changes before applying them.
 
 ```bash
-$ diff -y kafka-metrics-01.yaml kafka-metrics-00.yaml
+$ diff -y kafka-metrics-problem.yaml kafka-metrics-mitigation.yaml
   entityOperator:						                          entityOperator:
     template:							                              template:
       topicOperatorContainer:					                    topicOperatorContainer:
@@ -258,7 +258,7 @@ $ diff -y kafka-metrics-01.yaml kafka-metrics-00.yaml
 Apply the recommended Prequel mitigation.
 
 ```bash
-$ kubectl -n strimzi apply -f ./kafka-metrics-00.yaml
+$ kubectl -n strimzi apply -f ./kafka-metrics-mitigation.yaml
 ```
 
 Watch the `kafkatopics.kafka.strimzi.io` resources to ensure the new topic is created.
