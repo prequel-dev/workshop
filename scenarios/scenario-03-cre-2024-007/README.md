@@ -2,53 +2,7 @@
 
 ## Overview
 
-## Common Relability Enumeration (CRE) 2024-007
-
 [RabbitMQ](https://www.rabbitmq.com/) is a messaging system that allows different parts of a software application to communicate with each other by sending and receiving messages. Think of it as a postal service within a software system where messages (letters) are sent to queues (mailboxes), and other parts of the system can retrieve those messages when they're ready.
-
-Reliability intelligence provides a way to describe known problems with software in a machine readiable way. This enables you to automatically detect and mitigate problems in your environment without spending troubleshooting and researching the problem yourself.
-
-This scenario explores CRE-2024-007, a [known issue](https://github.com/rabbitmq/rabbitmq-server/issues/1713) with RabbitMQ queues.
-
-```
-{
-    "title": "RabbitMQ Mnesia overloaded recovering persistent queues",
-    "description": "There is a known problem where RabbitMQ can become unresponsive due to Mnesia overload on start-up while processing several persistent queues. The only message in Rabbitmq log is Mnesia is overloaded.",
-    "type": "message-queue-problems",
-    "severity": "critical",
-    "metrics": "rabbitmq_fd_used",
-    "symptoms": [
-        "number of socket connections is low"
-    ],
-    "reports": 1,
-    "applications": [
-        {
-            "application": "rabbitmq"
-        },
-        {
-            "application": "mnesia"
-        }
-    ],
-    "cause": "CPU limitations",
-    "solutions": [
-        "Increase the Kubernetes CPU limits for the RabbitMQ brokers"
-    ],
-    "tags": [
-        "rabbitmq",
-        "mnesia"
-    ],
-    "detections": [
-        {
-            "query language": "Prequel",
-            "rule": "k8(image_url=\"docker.io/bitnami/rabbitmq:3.9.14*\", event=READINESS) | log(pattern=\"Mnesia is overloaded\", window=90s)"
-        }
-    ],
-    "references": [
-        "[https://github.com/rabbitmq/rabbitmq-server/issues/1713](https://github.com/rabbitmq/rabbitmq-server/issues/1713)",
-        "[https://github.com/rabbitmq/rabbitmq-server/issues/687](https://github.com/rabbitmq/rabbitmq-server/issues/687)"
-    ]
-}
-```
 
 ## Lab (about 20 minutes)
 
@@ -186,6 +140,52 @@ $ kubectl -n rabbitmq logs my-rabbitmq-cluster-server-0 -f
 The RabbitMQ cluster is processing a large number of persistent mirrored queues at boot. There are so many that the underlying Erlang process, `Mnesia`, is reporting that it is overloaded while recoving these queues on boot. During this period, RabbitMQ is unable to process any new messages, which can lead to outages.
 
 Note that there are no RabbitMQ VM threshold watermark alerts.
+
+#### Common Relability Enumeration (CRE) 2024-007
+
+Reliability intelligence provides a way to describe known problems with software in a machine readable way. This enables you to automatically detect and mitigate problems in your environment without spending time figuring out which metrics to montior and saves time troubleshooting and researching the problem yourself.
+
+This scenario explores CRE-2024-007, a [known issue](https://github.com/rabbitmq/rabbitmq-server/issues/1713) with RabbitMQ queues.
+
+```
+{
+    "title": "RabbitMQ Mnesia overloaded recovering persistent queues",
+    "description": "There is a known problem where RabbitMQ can become unresponsive due to Mnesia overload on start-up while processing several persistent queues. The only message in Rabbitmq log is Mnesia is overloaded.",
+    "type": "message-queue-problems",
+    "severity": "critical",
+    "metrics": "rabbitmq_fd_used",
+    "symptoms": [
+        "number of socket connections is low"
+    ],
+    "reports": 1,
+    "applications": [
+        {
+            "application": "rabbitmq"
+        },
+        {
+            "application": "mnesia"
+        }
+    ],
+    "cause": "CPU limitations",
+    "solutions": [
+        "Increase the Kubernetes CPU limits for the RabbitMQ brokers"
+    ],
+    "tags": [
+        "rabbitmq",
+        "mnesia"
+    ],
+    "detections": [
+        {
+            "query language": "Prequel",
+            "rule": "k8(image_url=\"docker.io/bitnami/rabbitmq:3.9.14*\", event=READINESS) | log(pattern=\"Mnesia is overloaded\", window=90s)"
+        }
+    ],
+    "references": [
+        "[https://github.com/rabbitmq/rabbitmq-server/issues/1713](https://github.com/rabbitmq/rabbitmq-server/issues/1713)",
+        "[https://github.com/rabbitmq/rabbitmq-server/issues/687](https://github.com/rabbitmq/rabbitmq-server/issues/687)"
+    ]
+}
+```
 
 ### Step 5: Implement mitigation (2 minutes)
 

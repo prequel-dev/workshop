@@ -6,49 +6,6 @@
 
 This exercise will introduce you to creating and using Kafka topics. You will learn how to discover and troubleshoot a [known problem](https://github.com/strimzi/strimzi-kafka-operator/issues/6046) with Kafka.
 
-## Common Relability Enumeration (CRE) 2024-009
-
-Reliability intelligence provides a way to describe known problems with software in a machine readable way. This enables you to automatically detect and mitigate problems in your environment without spending time troubleshooting and researching the problem yourself.
-
-This scenario explores CRE-2024-006, a [known issue](https://github.com/strimzi/strimzi-kafka-operator/issues/6046) with the Strimzi Kafka topic operator.
-
-```
-{
-    "title": "Strimzi Kafka Topic Operator Thread Blocked",
-    "description": "There is a known issue in the Strimzi Kafka Topic Operator where the operator thread can become blocked. This can cause the operator to stop processing events and can lead to a backlog of events. This can cause the operator to become unresponsive and can lead to liveness probe failures and restarts of the Strimzi Kafka Topic Operator.",
-    "type": "message-queue-problems",
-    "severity": "critical",
-    "metrics": "",
-    "symptoms": [
-        "blocked threads"
-    ],
-    "reports": 1,
-    "applications": [
-        {
-            "application": "Strimzi kafka"
-        }
-    ],
-    "cause": "CPU limitations",
-    "solutions": [
-        "Use the Zookeeper store instead of the Kafka Streams store for the Strimzi Kafka Topic Operator"
-    ],
-    "tags": [
-        "kafka",
-        "threads",
-        "strimzi"
-    ],
-    "detections": [
-        {
-            "query language": "Prequel",
-            "rule": "k8(container_name=\"topic-operator\", event=STARTUP) | log( pattern=\"io.vertx.core.VertxException: Thread blocked\", window=90s)"
-        }
-    ],
-    "references": [
-        "[https://github.com/strimzi/strimzi-kafka-operator/issues/6046](https://github.com/strimzi/strimzi-kafka-operator/issues/6046)"
-    ]
-}
-```
-
 ## Lab (about 20 minutes)
 
 ### Step 1: Add a new Kafka topic (5 minutes)
@@ -232,6 +189,49 @@ io.vertx.core.VertxException: Thread blocked
 ```
 
 The main event loop is blocked. As a result, the `topic-operator` is unable to monitor and update Kafka topics.
+
+#### Common Relability Enumeration (CRE) 2024-009
+
+Reliability intelligence provides a way to describe known problems with software in a machine readable way. This enables you to automatically detect and mitigate problems in your environment without spending time troubleshooting and researching the problem yourself.
+
+This scenario explores CRE-2024-006, a [known issue](https://github.com/strimzi/strimzi-kafka-operator/issues/6046) with the Strimzi Kafka topic operator.
+
+```
+{
+    "title": "Strimzi Kafka Topic Operator Thread Blocked",
+    "description": "There is a known issue in the Strimzi Kafka Topic Operator where the operator thread can become blocked. This can cause the operator to stop processing events and can lead to a backlog of events. This can cause the operator to become unresponsive and can lead to liveness probe failures and restarts of the Strimzi Kafka Topic Operator.",
+    "type": "message-queue-problems",
+    "severity": "critical",
+    "metrics": "",
+    "symptoms": [
+        "blocked threads"
+    ],
+    "reports": 1,
+    "applications": [
+        {
+            "application": "Strimzi kafka"
+        }
+    ],
+    "cause": "CPU limitations",
+    "solutions": [
+        "Use the Zookeeper store instead of the Kafka Streams store for the Strimzi Kafka Topic Operator"
+    ],
+    "tags": [
+        "kafka",
+        "threads",
+        "strimzi"
+    ],
+    "detections": [
+        {
+            "query language": "Prequel",
+            "rule": "k8(container_name=\"topic-operator\", event=STARTUP) | log( pattern=\"io.vertx.core.VertxException: Thread blocked\", window=90s)"
+        }
+    ],
+    "references": [
+        "[https://github.com/strimzi/strimzi-kafka-operator/issues/6046](https://github.com/strimzi/strimzi-kafka-operator/issues/6046)"
+    ]
+}
+```
 
 ### Step 5: Implement mitigation (2 minutes)
 

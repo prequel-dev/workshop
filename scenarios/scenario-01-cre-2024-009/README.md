@@ -6,7 +6,6 @@ The OpenTelemetry Collector is a key component in the [OpenTelemetry project](ht
 
 This exercise will introduce you to monitoring the OpenTelemetry Collector. You will learn how to discover and troubleshoot problems with the Collector. And you will learn how to better manage and operate an OpenTelemetry collector at scale.
 
-
 ## Lab (about 20 minutes)
 
 ### Step 1: Monitor metrics for OpenTelemetry Collector (1 minute)
