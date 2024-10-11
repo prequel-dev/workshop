@@ -91,9 +91,7 @@ Trigger completed
 
 While the job is running, use Prometheus to monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric for the OpenTelemetry Collector container in the `monitoring` namespace.
 
-#### Questions
-
-1. Q: What do you see happening in Prometheus?
+#### Question 1: What do you see happening in Prometheus?
 
 **Hints:**
 
@@ -109,7 +107,7 @@ container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentel
 kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="opentelemetry-collector"}
 ```
 
-2. Q: Why is it happening? What steps would you need to take to figure it out?
+#### Question 2: Why is it happening? What steps would you need to take to figure it out?
 
 **Hints:**
 
@@ -126,7 +124,7 @@ $ k -n monitoring get events -w -A | grep -E "Unhealthy|Warning"
 default      101s        Warning   OOMKilling         node/gke-cluster-1-default-pool-ba0df502-thrv   Memory cgroup out of memory: Killed process 1021235 (otelcol-k8s) total-vm:1553900kB, anon-rss:201972kB, file-rss:70040kB, shmem-rss:0kB, UID:10001 pgtables:784kB oom_score_adj:994
 ```
 
-3. Q: How could we fix this problem?
+#### Question 3: How could we fix this problem?
 
 **Hints:** 
 
@@ -139,12 +137,11 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data and graph.
 
-**Questions:**
+Look at the OpenTelemetry Logs in the detection. Do you see the same errors? Change filters to view the Process CPU and memory. Look at HTTP data. And look at Kubernetes events.
 
-1. Q: What does the detection tell you is happening?
-2. Q: Are you able to figure out why it might be happening from the log and HTTP data in the detection?
-3. Q: Where is it coming from based on the graph?
-4. Q: Are you able to figure out how to mitigate the problem?
+View the Graph in the detection. Where are the traces coming from?
+
+Click on How To Mitigate -> Details. Does the rule help explain the probelm and recommend mitigations?
 
 #### Problem Explanation
 
