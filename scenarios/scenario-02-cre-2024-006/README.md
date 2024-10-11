@@ -10,11 +10,22 @@ This exercise will introduce you to creating and using Kafka topics. You will le
 
 ### Step 1: Add a new Kafka topic (5 minutes)
 
-This lab exercise uses [Strimzi Kafka for Kubernetes](https://strimzi.io/). Strimzi provides a way to run an Apache Kafka cluster on Kubernetes in various deployment configurations. 
+This lab exercise uses [Strimzi Kafka for Kubernetes](https://strimzi.io/). Strimzi provides a way to run an Apache Kafka cluster on Kubernetes in various deployment configurations. It installs a Kubernetes operator to automate the creation and management of Kafka clusters in Kubernetes.
 
-Let's discover how to add new Kafka topics. Kafka topics are the categories used to organize messages. Each topic has a name that is unique across the entire Kafka cluster. Messages are sent to and read from specific topics. Producers write data to topics and consumers read data from topics. 
+A Kubernetes operator is a method of automating the management of complex applications and services on Kubernetes. It extends Kubernetes' functionality by using its native API and controller patterns to manage the lifecycle of application components. Operators are typically designed to handle custom resources, which are application-specific abstractions that represent the state of an application in Kubernetes.
 
-The Strimzi Kafka [entity operator](https://strimzi.io/docs/operators/0.28.0/full/configuring#assembly-kafka-entity-operator-str) is used to manage Kafka-related entities in a running Kafka cluster. It contains a user and topic operator. The operators are automatically configured to monitor and manage the topics and users of the Kafka cluster.
+An operator essentially combines the concept of custom resources (CRDs or Custom Resource Definitions) with a custom controller that manages the desired state of the application. These operators can automate tasks such as:
+
+* Deploying applications
+* Upgrading and scaling applications
+* Handling application-specific tasks like backups, failover, and monitoring
+* Responding to custom events or failures
+
+Let's use the Strimzi Kafka operator to add a new Kafka topic. 
+
+Kafka topics are the categories used to organize messages. Each topic has a name that is unique across the entire Kafka cluster. Messages are sent to and read from specific topics. Producers write data to topics and consumers read data from topics. 
+
+The Strimzi Kafka [entity operator](https://strimzi.io/docs/operators/0.28.0/full/configuring#assembly-kafka-entity-operator-str) is specifically used to monitor and manage the topics and users of the Kafka cluster.
 
 Change directories to the scenario folder:
     
@@ -31,7 +42,9 @@ $ kubectl -n strimzi apply -f ./topic-00.yaml
 kafkatopic.kafka.strimzi.io/topic-00 created
 ```
 
-After a few minutes you should see that the new topic `topic-00` is ready.
+This command creates a new `kafkatopics.kafka.strimzi.io` resource. The operator will see this new resource and create the new Kafka topic for you.
+
+After a few minutes you should see that the new topic `topic-00` is ready (`READY=True`).
 
 ```bash
 $ kubectl -n strimzi get kafkatopics.kafka.strimzi.io 
@@ -63,10 +76,6 @@ The 0.999 quantile means that 99.9% of the time, topic changes take less than or
 
 You can explore additional Kafka metrics by typing `kafka_` in the search bar and reviewing the list of metrics. Or you can use the Metrics Explorer interface next to the Execute button.
 
-Question:
-
-* What other Kafka metrics might be important to monitor the health of Kafka topic creation?
-
 ### Step 3: Trigger problem (10 minutes)
 
 Now let's recreate the problem associated with CRE-2024-006.
@@ -76,6 +85,8 @@ $ kubectl -n strimzi apply -f ./kafka-metrics-problem.yaml
 kafka.kafka.strimzi.io/my-cluster configured
 configmap/kafka-metrics unchanged
 ```
+
+This command will update the cluster.
 
 Monitor Kubernetes events to wait until the entity operator is successfully re-created. This can take a few minutes for the Strimzi Kafka operator to reconcile the configuration change. 
 
@@ -100,14 +111,39 @@ topic-00                                                                        
 topic-01                                                                                           my-cluster   3            1                    
 ```
 
-Questions: 
+#### Question 1: What do you observe with the new topic? Does it get created?
 
-* What do you observe with the new topic? Does it get created? Why or why not?
-* Does the `kafka_controller_controllerstats_topicchangerateandtimems` metric in Prometheus help you understand what is happening?
-* Why isn't the new topic being created? What steps would you need to take to figure this out?
-* How would we fix it?
-* What other metrics can we explore to help monitor this problem? Do any of the `vertx*` metrics help?
-* How could you create an alert for this with Prometheus/Alertmanager?
+Did `READY` ever update to `True` for the new topic?
+
+#### Question 2: Does the `kafka_controller_controllerstats_topicchangerateandtimems` metric in Prometheus help you understand what is happening?
+
+The metric doesn't really help us understand 1) that new topics are no longer being created and 2) why new topics aren't being created.
+
+Let's look at logs.
+
+```bash
+$ kubectl -n strimzi logs deployments/my-cluster-entity-operator -f | grep -i exception
+Defaulted container "topic-operator" out of: topic-operator, user-operator, tls-sidecar
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+io.vertx.core.VertxException: Thread blocked
+```
+
+Kafka is written in the Java programming language. It uses the https://github.com/eclipse-vertx/vert.x thread library. The exceptions in the logs indicate that threats in the operator are blocked and not running.
+
+#### Question 3: How could we fix it?
+
+We could give the `topic-operator` more CPU resources.
 
 ### Step 4: Use Prequel to detect problem (1 minute)
 
@@ -125,65 +161,9 @@ Questions:
 
 Note the following details in the `topic-operator` in the Kafka `entity-operator`:
 
-```bash
-$ kubectl -n strimzi logs deployments/my-cluster-entity-operator -c topic-operator
-2024-10-09 17:38:09,11626 INFO  [vert.x-eventloop-thread-0] Session:205 - Starting
-2024-10-09 17:38:12,21498 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 2897 ms, time limit is 2000 ms
-2024-10-09 17:38:12,71510 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 3897 ms, time limit is 2000 ms
-2024-10-09 17:38:13,71506 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 4897 ms, time limit is 2000 ms
-2024-10-09 17:38:14,91513 WARN  [vertx-blocked-thread-checker] BlockedThreadChecker: - Thread Thread[vert.x-eventloop-thread-0,5,main] has been blocked for 5897 ms, time limit is 2000 ms
-io.vertx.core.VertxException: Thread blocked
-	at java.security.MessageDigest.digest(MessageDigest.java:405) ~[?:?]
-	at com.sun.crypto.provider.HmacCore.engineDoFinal(HmacCore.java:227) ~[?:?]
-	at javax.crypto.Mac.doFinal(Mac.java:581) ~[?:?]
-	at javax.crypto.Mac.doFinal(Mac.java:624) ~[?:?]
-	at com.sun.crypto.provider.PBKDF2KeyImpl.deriveKey(PBKDF2KeyImpl.java:192) ~[?:?]
-	at com.sun.crypto.provider.PBKDF2KeyImpl.<init>(PBKDF2KeyImpl.java:117) ~[?:?]
-	at com.sun.crypto.provider.PBKDF2Core.engineGenerateSecret(PBKDF2Core.java:69) ~[?:?]
-	at com.sun.crypto.provider.PBES2Core.engineInit(PBES2Core.java:280) ~[?:?]
-	at com.sun.crypto.provider.PBES2Core.engineInit(PBES2Core.java:307) ~[?:?]
-	at javax.crypto.Cipher.implInit(Cipher.java:847) ~[?:?]
-	at javax.crypto.Cipher.chooseProvider(Cipher.java:901) ~[?:?]
-	at javax.crypto.Cipher.init(Cipher.java:1576) ~[?:?]
-	at javax.crypto.Cipher.init(Cipher.java:1507) ~[?:?]
-	at sun.security.pkcs12.PKCS12KeyStore.lambda$engineLoad$1(PKCS12KeyStore.java:2111) ~[?:?]
-	at sun.security.pkcs12.PKCS12KeyStore$$Lambda$253/0x00000008402d0c40.tryOnce(Unknown Source) ~[?:?]
-	at sun.security.pkcs12.PKCS12KeyStore$RetryWithZero.run(PKCS12KeyStore.java:276) ~[?:?]
-	at sun.security.pkcs12.PKCS12KeyStore.engineLoad(PKCS12KeyStore.java:2106) ~[?:?]
-	at sun.security.util.KeyStoreDelegator.engineLoad(KeyStoreDelegator.java:243) ~[?:?]
-	at java.security.KeyStore.load(KeyStore.java:1479) ~[?:?]
-	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory$FileBasedStore.load(DefaultSslEngineFactory.java:372) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory$FileBasedStore.<init>(DefaultSslEngineFactory.java:347) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory.createKeystore(DefaultSslEngineFactory.java:297) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.security.ssl.DefaultSslEngineFactory.configure(DefaultSslEngineFactory.java:161) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.security.ssl.SslFactory.instantiateSslEngineFactory(SslFactory.java:140) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.security.ssl.SslFactory.configure(SslFactory.java:97) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.network.SslChannelBuilder.configure(SslChannelBuilder.java:73) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.network.ChannelBuilders.create(ChannelBuilders.java:192) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.common.network.ChannelBuilders.clientChannelBuilder(ChannelBuilders.java:81) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.clients.ClientUtils.createChannelBuilder(ClientUtils.java:105) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.clients.admin.KafkaAdminClient.createInternal(KafkaAdminClient.java:524) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.clients.admin.KafkaAdminClient.createInternal(KafkaAdminClient.java:485) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.clients.admin.Admin.create(Admin.java:134) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at org.apache.kafka.clients.admin.AdminClient.create(AdminClient.java:39) ~[org.apache.kafka.kafka-clients-3.3.1.jar:?]
-	at io.strimzi.operator.topic.Session.start(Session.java:210) ~[io.strimzi.topic-operator-0.32.0.jar:0.32.0]
-	at io.vertx.core.impl.DeploymentManager.lambda$doDeploy$5(DeploymentManager.java:196) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
-	at io.vertx.core.impl.DeploymentManager$$Lambda$222/0x00000008402b0040.handle(Unknown Source) ~[?:?]
-	at io.vertx.core.impl.ContextInternal.dispatch(ContextInternal.java:264) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
-	at io.vertx.core.impl.ContextInternal.dispatch(ContextInternal.java:246) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
-	at io.vertx.core.impl.EventLoopContext.lambda$runOnContext$0(EventLoopContext.java:43) ~[io.vertx.vertx-core-4.3.4.jar:4.3.4]
-	at io.vertx.core.impl.EventLoopContext$$Lambda$223/0x00000008402b0c40.run(Unknown Source) ~[?:?]
-	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:174) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
-	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:167) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
-	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
-	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:503) ~[io.netty.netty-transport-4.1.77.Final.jar:4.1.77.Final]
-	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:995) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
-	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[io.netty.netty-common-4.1.77.Final.jar:4.1.77.Final]
-	at java.lang.Thread.run(Thread.java:829) ~[?:?]
-```
+![Kafka Topic Operator logs](./images/kafka-prequel-logs.png)
 
-The main event loop is blocked. As a result, the `topic-operator` is unable to monitor and update Kafka topics.
+The detection identifies that the main event loop is blocked. 
 
 #### Common Relability Enumeration (CRE) 2024-009
 
