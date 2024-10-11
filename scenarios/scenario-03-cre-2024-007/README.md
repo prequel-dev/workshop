@@ -226,7 +226,7 @@ rabbitmqcluster.rabbitmq.com/my-rabbitmq-cluster created
 Monitor the creation of the new cluster. Once the cluster pods enter the ready state, tail the log files of one of the clusters to see if the problem with `Mnesia` happens again.
 
 ```bash
-$ k -n rabbitmq get pods -o wide -w
+$ kubectl -n rabbitmq get pods -o wide -w
 NAME                                                              READY   STATUS    RESTARTS   AGE   IP            NODE                                 NOMINATED NODE   READINESS GATES
 my-rabbitmq-cluster-server-0                                      0/1     Running   0          82s   10.116.4.51   gke-lab-default-pool-4fa5bdf0-v2jq   <none>           <none>
 my-rabbitmq-cluster-server-1                                      0/1     Running   0          81s   10.116.8.57   gke-lab-default-pool-6a8caa23-mpx1   <none>           <none>
