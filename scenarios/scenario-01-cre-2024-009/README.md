@@ -36,6 +36,8 @@ $ pwd
 /home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
 ```
 
+Run the `trigger.sh` script. This script will create a Kubernetes job that generates Jaeger traces and sends them to the OpenTelemetry Collector. It takes a few minutes to complete.
+
 ```bash
 ./trigger.sh 
 Error from server (NotFound): jobs.batch "traces-generator-job" not found
@@ -87,13 +89,11 @@ job.batch "traces-generator-job" deleted
 Trigger completed
 ```
 
-This may take a few minutes to complete. 
-
-Use Prometheus to monitor the metrics for the OpenTelemetry Collector container in the `monitoring` namespace.
+While the job is running, use Prometheus to monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric for the OpenTelemetry Collector container in the `monitoring` namespace.
 
 #### Questions
 
-* What do you see happening in Prometheus?
+1. Q: What do you see happening in Prometheus?
 
 **Hints:**
 
@@ -109,11 +109,11 @@ container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentel
 kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="opentelemetry-collector"}
 ```
 
-* Why is it happening? What steps would you need to take to figure it out?
+2. Q: Why is it happening? What steps would you need to take to figure it out?
 
 **Hints:**
 
-Grep the logs for errors:
+Look at the Kubernetes logs and search for errors:
 
 ```bash
 kubectl -n monitoring logs deployments/otel-collector | grep -i error
@@ -126,12 +126,12 @@ $ k -n monitoring get events -w -A | grep -E "Unhealthy|Warning"
 default      101s        Warning   OOMKilling         node/gke-cluster-1-default-pool-ba0df502-thrv   Memory cgroup out of memory: Killed process 1021235 (otelcol-k8s) total-vm:1553900kB, anon-rss:201972kB, file-rss:70040kB, shmem-rss:0kB, UID:10001 pgtables:784kB oom_score_adj:994
 ```
 
-* How could we fix this problem?
+3. Q: How could we fix this problem?
 
 **Hints:** 
 
-1. We can fix the export configuration to ensure that traces are forwarded successfully
-2. We can reduce the data sent to the OpenTelemetry Collector to prevent it from being overwhelmed
+* We can fix the export configuration to ensure that traces are forwarded successfully
+* We can reduce the data sent to the OpenTelemetry Collector to prevent it from being overwhelmed
 
 ### Step 3: Use Prequel to detect problem (1 minute)
 
@@ -141,10 +141,10 @@ Click on the most recent detection and explore the detection data and graph.
 
 **Questions:**
 
-* What does the detection tell you is happening?
-* Are you able to figure out why it might be happening from the log and HTTP data in the detection?
-* Where is it coming from based on the graph?
-* Are you able to figure out how to mitigate the problem?
+1. Q: What does the detection tell you is happening?
+2. Q: Are you able to figure out why it might be happening from the log and HTTP data in the detection?
+3. Q: Where is it coming from based on the graph?
+4. Q: Are you able to figure out how to mitigate the problem?
 
 #### Problem Explanation
 
@@ -295,7 +295,7 @@ data:                                           data:
           - jaeger                                        - jaeger
 ```
 
-Update the configuration to use the mitigation.
+Update the OpenTelemetry Collector configuration to use the mitigation.
 
 ```bash
 kubectl -n monitoring apply -f ./otel-config-01.yaml 
