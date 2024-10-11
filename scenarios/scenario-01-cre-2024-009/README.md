@@ -95,7 +95,7 @@ While the job is running, use Prometheus to monitor the `container_memory_rss{na
 
 #### Question 1: What do you see happening in Prometheus?
 
-**Hints:**
+_Hints:_
 
 Monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric in Prometheus. Is it increasing?
 
@@ -111,7 +111,7 @@ kube_pod_container_status_last_terminated_reason{namespace="monitoring", contain
 
 #### Question 2: Why is it happening? What steps would you need to take to figure it out?
 
-**Hints:**
+_Hints:_
 
 Look at the Kubernetes logs and search for errors:
 
@@ -128,7 +128,7 @@ default      101s        Warning   OOMKilling         node/gke-cluster-1-default
 
 #### Question 3: How could we fix this problem?
 
-**Hints:** 
+_Hints:_
 
 * We can fix the export configuration to ensure that traces are forwarded successfully
 * We can reduce the data sent to the OpenTelemetry Collector to prevent it from being overwhelmed
