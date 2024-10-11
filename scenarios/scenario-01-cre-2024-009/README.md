@@ -36,7 +36,9 @@ $ pwd
 /home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
 ```
 
-Run the `trigger.sh` script. This script will create a Kubernetes job that generates Jaeger traces and sends them to the OpenTelemetry Collector. It takes a few minutes to complete.
+Run the `trigger.sh` script to trigger the scenario problem. 
+
+This script will create a Kubernetes job that generates Jaeger traces and sends them to the OpenTelemetry Collector. It takes a few minutes to complete.
 
 ```bash
 ./trigger.sh 
