@@ -14,7 +14,7 @@ Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.c
 
 Visualize memory usage for the Opentelemetry Collector by viewing a graph of the `container_memory_rss` metric in the `monitoring` namespace.
 
-```
+```bash
 container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}
 ```
 
@@ -91,16 +91,15 @@ This may take a few minutes to complete.
 
 Use Prometheus to monitor the metrics for the OpenTelemetry Collector container in the `monitoring` namespace.
 
-**Questions:** 
+#### Questions
 
 * What do you see happening in Prometheus?
-* Why is it happening? What steps would you need to take to figure it out?
-* How would we fix it?
-* How could you create an alert for this with Prometheus/Alertmanager?
 
-**Hints:** 
+**Hints:**
 
-Suggested metrics to explore:
+Monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric in Prometheus. Is it increasing?
+
+Other metrics to explore:
 
 ```bash
 container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentelemetry-collector-k8s:0.111.0"}
@@ -109,6 +108,30 @@ container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentel
 ```bash
 kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="opentelemetry-collector"}
 ```
+
+* Why is it happening? What steps would you need to take to figure it out?
+
+**Hints:**
+
+Grep the logs for errors:
+
+```bash
+kubectl -n monitoring logs deployments/otel-collector | grep -i error
+```
+
+Check the Kubernetes events for any unhealthy or warning events:
+
+```bash
+$ k -n monitoring get events -w -A | grep -E "Unhealthy|Warning"
+default      101s        Warning   OOMKilling         node/gke-cluster-1-default-pool-ba0df502-thrv   Memory cgroup out of memory: Killed process 1021235 (otelcol-k8s) total-vm:1553900kB, anon-rss:201972kB, file-rss:70040kB, shmem-rss:0kB, UID:10001 pgtables:784kB oom_score_adj:994
+```
+
+* How could we fix this problem?
+
+**Hints:** 
+
+1. We can fix the export configuration to ensure that traces are forwarded successfully
+2. We can reduce the data sent to the OpenTelemetry Collector to prevent it from being overwhelmed
 
 ### Step 3: Use Prequel to detect problem (1 minute)
 
@@ -127,21 +150,21 @@ Click on the most recent detection and explore the detection data and graph.
 
 Note the following log lines in the OpenTelemetry Collector:
 
-```bash
-$ kubectl -n monitoring logs deployments/otel-collector-opentelemetry-collector
-2024-10-09T17:13:08.563Z	warn	grpc@v1.67.1/clientconn.go:1379	[core] [Channel #1 SubChannel #8]grpc: addrConn.createTransport failed to connect to {Addr: "127.0.0.1:4319", ServerName: "localhost:4319", }. Err: connection error: desc = "transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused"	{"grpc_log": true}
-2024-10-09T17:13:08.563Z	warn	grpc@v1.67.1/clientconn.go:1379	[core] [Channel #1 SubChannel #8]grpc: addrConn.createTransport failed to connect to {Addr: "[::1]:4319", ServerName: "localhost:4319", }. Err: connection error: desc = "transport: Error while dialing: dial tcp [::1]:4319: connect: cannot assign requested address"	{"grpc_log": true}
-2024-10-09T17:13:10.510Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "15.940329642s"}
-2024-10-09T17:13:12.954Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "42.666106117s"}
-2024-10-09T17:13:13.541Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "16.483723636s"}
-2024-10-09T17:13:15.232Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "20.515484291s"}
-2024-10-09T17:13:15.660Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "14.58537921s"}
-2024-10-09T17:13:19.846Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "17.095877718s"}
-2024-10-09T17:13:20.086Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "31.629400874s"}
-2024-10-09T17:13:21.504Z	info	internal/retry_sender.go:118	Exporting failed. Will retry the request after interval.	{"kind": "exporter", "data_type": "traces", "name": "otlp", "error": "rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:4319: connect: connection refused\"", "interval": "16.520110222s"}
-```
+![Prequel OTel Logs](./images/otel-prequel-logs.png)
 
-The OpenTelemetry Collector receives traces from your cluster and forwards it on to a destination source, such as Prometheus. The logs above indicate that the collector is unable to forward the data it is receiving. This data builds up in the collector's memory, eventually consuming more than its resource limit. When this resource limit is exceeded, the container is terminated by Linux. This container status event shows up in Kuberetes as an `OOMKilling` event.
+The OpenTelemetry Collector receives traces from your cluster and forwards it on to a destination source, such as Prometheus. The logs above indicate that the collector is unable to forward the data it is receiving. 
+
+![Prequel OTel memory](./images/otel-prequel-memory.png)
+
+This data builds up in the collector's memory, eventually consuming more than its resource limit. 
+
+![Prequel OTel K8s Events](./images/otel-prequel-k8s.png)
+
+When this resource limit is exceeded, the container is terminated by Linux. This container status event shows up in Kuberetes as an `OOMKilling` event.
+
+![Prequel OTel Graph](./images/otel-prequel-graph.png)
+
+The graph shows us where the trace data is coming from.
 
 #### Common Reliability Enumeration (CRE) 2024-009
 
@@ -205,7 +228,7 @@ Use `diff -y` to compare the current configuration with the new configuration im
 
 ```bash
 $ diff -y otel-config-00.yaml otel-config-01.yaml 
-apiVersion: v1                                        apiVersion: v1
+apiVersion: v1                                  apiVersion: v1
 data:                                           data:
   relay: |                                        relay: |
     exporters:                                      exporters:
