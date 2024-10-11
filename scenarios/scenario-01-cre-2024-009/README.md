@@ -2,12 +2,12 @@
 
 ## Overview
 
-You're an SRE at a fast-growing fintech company. Your responsibilities include monitoring all layers of the application and putting the appropriate observability tooling in place.
-The tool of choice is the Grafana/Prometheus stack.  
+You are an SRE at a fast-growing fintech company. Your responsibilities include monitoring all layers of the application and putting the appropriate observability tooling in place.
+The tool of choice is the Grafana/Prometheus stack. 
 
-The OpenTelemetry Collector is a key component in the [OpenTelemetry project](https://opentelemetry.io/) that acts as a centralized agent for collecting, processing, and exporting telemetry data such as traces, metrics, and logs from different applications and systems to observability tool. 
+The OpenTelemetry Collector is a key component in the [OpenTelemetry project](https://opentelemetry.io/) and you use it as a centralized agent for collecting, processing, and exporting telemetry data such as traces, metrics, and logs from different applications and systems. 
 
-To make sure everything is healthy, you actively monitor these collectors in addition to other components.  
+To make sure everything is healthy, you actively monitor these collectors in addition your applications.  
 
 This exercise will introduce you to monitoring the OpenTelemetry Collector. You will learn how to discover and troubleshoot problems with the Collector, enabling it to better operate at scale.
 
