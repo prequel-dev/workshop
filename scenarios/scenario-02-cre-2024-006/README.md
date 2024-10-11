@@ -151,12 +151,6 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data.
 
-Questions:
-
-* What does the detection tell you is happening?
-* Are you able to figure out why it might be happening from the log data in the detection?
-* Are you able to figure out how to mitigate the problem?
-
 #### Problem Explanation
 
 Note the following details in the `topic-operator` in the Kafka `entity-operator`:
@@ -210,9 +204,9 @@ This scenario explores CRE-2024-006, a [known issue](https://github.com/strimzi/
 
 ### Step 5: Implement mitigation (2 minutes)
 
-Click on How To Mitigate -> Details. What are the recommended changes to fix this problem?
+In the Prequel UI, click on How To Mitigate -> Details. What are the recommended changes to fix this problem?
 
-Use `diff -y` to see the changes before applying them.
+Use `diff -y` to see the Prequel recommended mitigations.
 
 ```bash
 $ diff -y kafka-metrics-problem.yaml kafka-metrics-mitigation.yaml
@@ -234,6 +228,8 @@ $ diff -y kafka-metrics-problem.yaml kafka-metrics-mitigation.yaml
           cpu: 20m					                        |	        cpu: 100m
           memory: 300Mi						                            memory: 300Mi
 ```
+
+The mitigation contains two key changes. We increase the CPU resources. And we change the `STRIMZI_USE_ZOOKEEPER_TOPIC_STORE` to true, a recommended mitigation from the community that can resolve the problem now without upgrading to a newer version.
 
 Apply the recommended Prequel mitigation.
 
