@@ -2,7 +2,12 @@
 
 ## Overview
 
+You are an SRE at a fast-growing fintech company. Your responsibilities include monitoring all layers of the application and putting the appropriate observability tooling in place.
+The tool of choice is the Grafana/Prometheus stack. 
+
 [Apache Kafka](https://kafka.apache.org/) is an open-source distributed event streaming platform primarily used for building real-time data pipelines and streaming applications. It was originally developed by LinkedIn and is now maintained by the Apache Software Foundation.
+
+Your main customer-facing applicaton leverages Kafka to transport messages between a variety of microservices.  It’s your job to ensure that the platform remains reliable and scalable.
 
 This exercise will introduce you to creating and using Kafka topics. You will learn how to discover and troubleshoot a [known problem](https://github.com/strimzi/strimzi-kafka-operator/issues/6046) with Kafka.
 
@@ -27,12 +32,14 @@ Kafka topics are the categories used to organize messages. Each topic has a name
 
 The Strimzi Kafka [entity operator](https://strimzi.io/docs/operators/0.28.0/full/configuring#assembly-kafka-entity-operator-str) is specifically used to monitor and manage the topics and users of the Kafka cluster.
 
+Let's get started!
+
 Change directories to the scenario folder:
     
 ```bash
-$ cd /home/student/prequel/workshop/scenarios/scenario-02-cre-2024-009
+$ cd /home/student/prequel/workshop/scenarios/scenario-02-cre-2024-006
 $ pwd
-/home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
+/home/student/prequel/workshop/scenarios/scenario-02-cre-2024-006
 ```
 
 Add a new topic by applying the `topic-00.yaml` configuration file. 
@@ -139,11 +146,11 @@ io.vertx.core.VertxException: Thread blocked
 io.vertx.core.VertxException: Thread blocked
 ```
 
-Kafka is written in the Java programming language. It uses the https://github.com/eclipse-vertx/vert.x thread library. The exceptions in the logs indicate that threats in the operator are blocked and not running.
+Kafka is written in the Java programming language. It uses the https://github.com/eclipse-vertx/vert.x thread library. The exceptions in the logs indicate that threads in the operator are blocked and not running.
 
 #### Question 3: How could we fix it?
 
-We could give the `topic-operator` more CPU resources.
+We could give the `topic-operator` more CPU resources. This "may" help. 
 
 ### Step 4: Use Prequel to detect problem (1 minute)
 
@@ -229,7 +236,7 @@ $ diff -y kafka-metrics-problem.yaml kafka-metrics-mitigation.yaml
           memory: 300Mi						                            memory: 300Mi
 ```
 
-The mitigation contains two key changes. We increase the CPU resources. And we change the `STRIMZI_USE_ZOOKEEPER_TOPIC_STORE` to true, a recommended mitigation from the community that can resolve the problem now without upgrading to a newer version.
+The mitigation contains two key changes. We increase the CPU resources. And we change the `STRIMZI_USE_ZOOKEEPER_TOPIC_STORE` to true, a recommended mitigation from the community that can resolve the problem now without upgrading to a newer version.   This mitigation reverts to the older method of storing topic metadata in Zookeeper. This can temporarily resolve problems while you work on upgrading Kafka or Strimzi to a version where the issue is fixed.
 
 Apply the recommended Prequel mitigation.
 
@@ -237,7 +244,7 @@ Apply the recommended Prequel mitigation.
 $ kubectl -n strimzi apply -f ./kafka-metrics-mitigation.yaml
 ```
 
-Watch the `kafkatopics.kafka.strimzi.io` resources to ensure the new topic is created.
+Watch the `kafkatopics.kafka.strimzi.io` resources to ensure the new topic is created. This may take a few minutes. 
 
 ```bash
 $ kubectl -n strimzi get kafkatopics.kafka.strimzi.io -w
