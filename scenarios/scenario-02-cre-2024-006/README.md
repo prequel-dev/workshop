@@ -158,6 +158,10 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data.
 
+* Look at the topic-operator logs in the detection. Do you see the same errors?
+* Looks at the K8s events. 
+
+
 #### Problem Explanation
 
 Note the following details in the `topic-operator` in the Kafka `entity-operator`:
