@@ -7,7 +7,7 @@ The tool of choice is the Grafana/Prometheus stack.
 
 The OpenTelemetry Collector is a key component in the [OpenTelemetry project](https://opentelemetry.io/) and you use it as a centralized agent for collecting, processing, and exporting telemetry data such as traces, metrics, and logs from different applications and systems. 
 
-To make sure your team has the visibility they need, you actively monitor these collectors in addition your applications.  
+To make sure your team has the visibility they need, you actively monitor these collectors in addition to your applications.  
 
 This exercise will introduce you to monitoring the OpenTelemetry Collector. You will learn how to discover and troubleshoot problems with the Collector, enabling it to better operate at scale.
 
