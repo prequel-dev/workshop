@@ -144,6 +144,8 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data and graph.
 
+![Prequel OTel Detection](.images/prequel-otel-detection.png)
+
 Look at the OpenTelemetry Logs in the detection. Do you see the same errors? Change filters to view the Process CPU and memory. Look at HTTP data. And look at Kubernetes events.
 
 View the Graph in the detection. Where are the traces coming from?
