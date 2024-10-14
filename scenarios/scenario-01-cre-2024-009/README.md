@@ -7,17 +7,17 @@ The tool of choice is the Grafana/Prometheus stack.
 
 The OpenTelemetry Collector is a key component in the [OpenTelemetry project](https://opentelemetry.io/) and you use it as a centralized agent for collecting, processing, and exporting telemetry data such as traces, metrics, and logs from different applications and systems. 
 
-To make sure everything is healthy, you actively monitor these collectors in addition your applications.  
+To make sure your team has the visibility they need, you actively monitor these collectors in addition to your applications.  
 
 This exercise will introduce you to monitoring the OpenTelemetry Collector. You will learn how to discover and troubleshoot problems with the Collector, enabling it to better operate at scale.
 
 ## Lab (about 20 minutes)
 
-### Step 1: Monitor metrics for OpenTelemetry Collector (1 minute)
+### Step 1: Monitor metrics for the OpenTelemetry Collector (1 minute)
 
 Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.classroom.superorbital.io/ (change `XX` to your lab number found on your lab worksheet printout).
 
-Visualize memory usage for the Opentelemetry Collector by viewing a graph of the `container_memory_rss` metric in the `monitoring` namespace.
+Memory is one of the most propular metrics to monitor.  Let's visualize memory usage for the Opentelemetry Collector by viewing a graph of the `container_memory_rss` metric in the `monitoring` namespace.
 
 ```bash
 container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}
@@ -25,15 +25,19 @@ container_memory_rss{namespace="monitoring", container="opentelemetry-collector"
 
 ![Monitor OTel Collector memory](./images/otel-rss.png)
 
-The metric `container_memory_rss` measures the Resident Set Size (RSS), which is the amount of memory that a container has in RAM. Specifically, it shows the non-swapped physical memory used by the container, which is a critical indicator of how much memory the container is actively using from the available RAM. Memory resource limits measure RSS usage to determine whether a Kubernetes resource has exceeded its limit.
+The metric `container_memory_rss` measures the Resident Set Size (RSS), which is the amount of memory that a container has in RAM. Specifically, it shows the non-swapped physical memory used by the container, which is a critical indicator of how much memory the container is actively using from the available RAM. 
 
-This metric is useful for monitoring memory usage trends and potential memory pressure.
+Kubernetes memory resource limits measure RSS usage to determine whether a resource has exceeded its limit. At this point, the container will be OOMKilled (Out of Memory) by Linux. OOMKills are indicative of resource waste and scaling limitations.  When they occur, they can result in data loss, unpredictability, and service disruption.   With successive crashes, there is the risk that the container enters a CrashLoopBackOff state, where Kubernetes stops trying to restart it immediately and instead waits for longer periods between each restart attempt. 
+
+`container_memory_rss` is useful for monitoring memory usage trends and alerting on potential memory pressure.
 
 ### Step 2: Trigger problem (2 minutes)
 
-Now let's generate traces and send them to the OpenTelemetry Collector. In your terminal, run the following commands:
+To see how our collector performs under load, let's generate some application traces and send them to the OpenTelemetry Collector for processing. 
 
-Change directories to the scenario folder in case:
+You should already have an SSH session open to the workshop environment. In your terminal, run the following commands:
+
+Change directories to the relevant scenario folder:
 
 ```bash
 $ cd /home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
@@ -96,7 +100,7 @@ job.batch "traces-generator-job" deleted
 Trigger completed
 ```
 
-While the job is running, use Prometheus to monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric for the OpenTelemetry Collector container in the `monitoring` namespace.
+While the job is running, use Prometheus to monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric for the OpenTelemetry Collector container in the `monitoring` namespace to see how the Collector is doing. 
 
 #### Question 1: What do you see happening in Prometheus?
 
@@ -127,8 +131,13 @@ kubectl -n monitoring logs deployments/otel-collector | grep -i error
 Check the Kubernetes events for any unhealthy or warning events:
 
 ```bash
-$ k -n monitoring get events -w -A | grep -E "Unhealthy|Warning"
-default      101s        Warning   OOMKilling         node/gke-cluster-1-default-pool-ba0df502-thrv   Memory cgroup out of memory: Killed process 1021235 (otelcol-k8s) total-vm:1553900kB, anon-rss:201972kB, file-rss:70040kB, shmem-rss:0kB, UID:10001 pgtables:784kB oom_score_adj:994
+kubectl -n monitoring get events -w -A | grep -E "Unhealthy|Warning"
+```
+
+You should see a cgroup out of memory warning: 
+
+```bash
+default      101s        Warning   OOMKilling         node/gke-lab-default-pool-4fa5bdf0-v2jq   Memory cgroup out of memory: Killed process 1021235 (otelcol-k8s) total-vm:1553900kB, anon-rss:201972kB, file-rss:70040kB, shmem-rss:0kB, UID:10001 pgtables:784kB oom_score_adj:994
 ```
 
 #### Question 3: How could we fix this problem?
@@ -138,7 +147,7 @@ _Hints:_
 * We can fix the export configuration to ensure that traces are forwarded successfully
 * We can reduce the data sent to the OpenTelemetry Collector to prevent it from being overwhelmed
 
-### Step 3: Use Prequel to detect problem (1 minute)
+### Step 3: Use Prequel to detect and manage the problem (1 minute)
 
 Go to https://app-beta.prequel.dev and log in using your credentials. The credentials are found on your lab worksheet printout.
 
@@ -146,11 +155,16 @@ Click on the most recent detection and explore the detection data and graph.
 
 ![Prequel OTel Detection](.images/prequel-otel-detection.png)
 
-Look at the OpenTelemetry Logs in the detection. Do you see the same errors? Change filters to view the Process CPU and memory. Look at HTTP data. And look at Kubernetes events.
+Prequel has already done the heavy-lifting. Detecting the issue and stitching together relevant context.  
 
-View the Graph in the detection. Where are the traces coming from?
+* Look at the otel-collector Logs in the detection. Do you see the same errors? 
+* Change the data source filter to 'process' to view process CPU and memory. 
+* Look at HTTP data. And look at Kubernetes events.
+* View the Graph in the detection. Where are the traces coming from?
 
-Click on How To Mitigate -> Details. Does the rule help explain the probelm and recommend mitigations?
+How do we fix the issue? Prequel has a recommendation:
+
+Click on How To Mitigate -> Details. Does the rule help explain the problem and recommend mitigations?
 
 #### Problem Explanation
 

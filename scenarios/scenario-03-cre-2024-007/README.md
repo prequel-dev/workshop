@@ -2,7 +2,11 @@
 
 ## Overview
 
+You are an SRE at a fast-growing fintech company. Your responsibilities include monitoring all layers of the application and putting the appropriate observability tooling in place. The tool of choice is the Grafana/Prometheus stack.
+
 [RabbitMQ](https://www.rabbitmq.com/) is a messaging system that allows different parts of a software application to communicate with each other by sending and receiving messages. Think of it as a postal service within a software system where messages (letters) are sent to queues (mailboxes), and other parts of the system can retrieve those messages when they're ready.
+
+It's your job to make sure all elements of your application - including RabbitMQ and healthy. 
 
 ## Lab (about 20 minutes)
 
@@ -31,20 +35,35 @@ You can explore additional RabbitMQ metrics by typing `rabbitmq` in the search b
 #### Question 1: What other RabbitMQ metrics might be important to monitor? 
 
 ```bash
-rabbitmq_queue_messages_unacked
+rabbitmq_queue_messages_unacked{namespace="monitoring"}
 ```
 
 This metric measures the number of unacknowledged messages from consumers of your RabbitMQ queues. If this grows unbounded, then it could signal a performance issue in your services that use RabbitMQ to consume messages.
 
 ```bash
-rabbitmq_alarms_file_descriptor_limit
+rabbitmq_alarms_file_descriptor_limit{namespace="monitoring"}
 ```
 
 This metric is another alarm that signals when RabbitMQ has run out of file descriptor resources and can no longer process any persistent queues.
 
 ### Step 3: Trigger problem (10 minutes)
 
+You should already have an SSH session open to the workshop environment. In your terminal, run the following commands:
+
 Now let's recreate the problem associated with CRE-2024-007. This will take about 2 minutes.
+
+Change directories to the relevant scenario folder:
+
+```bash
+$ cd /home/student/prequel/workshop/scenarios/scenario-03-cre-2024-007/
+$ pwd
+/home/student/prequel/workshop/scenarios/scenario-03-cre-2024-007
+```
+
+Run the `trigger.sh` script to trigger the scenario problem. 
+
+This script will create a Kubernetes job that generates messages and sends them to RabbitMQ. It takes a few minutes to complete.
+
 
 ```bash
 $ time ./trigger.sh 
@@ -83,7 +102,9 @@ sys	0m0.995s
 
 #### Question 1: What seems to be happening to your RabbitMQ cluster?
 
-Let's look through the RabbitMQ logs to see what is happening.
+Take a look at your RabbitMQ metrics in Prometheus. 
+
+Let's also look through the RabbitMQ logs to see what is happening.
 
 First, search for warnings.
 
@@ -154,7 +175,7 @@ Now look at the Kubernetes events on this cluster at the time of the problem.
 
 See the readiness probe failures for RabbitMQ.
 
-Now look at the CPU data for the container.
+Now look at the process data to view the CPU data for the container.
 
 ![RabbitMQ cpu](./images/rabbitmq-prequel-cpu.png)
 
