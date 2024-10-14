@@ -161,6 +161,8 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data.
 
+![RabbitMQ detection](./images/prequel-rabbitmq-detection.png)
+
 #### Problem Explanation
 
 Look at the logs for the RabbitMQ container with the detection.
