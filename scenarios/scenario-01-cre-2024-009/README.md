@@ -20,7 +20,7 @@ Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.c
 Memory is one of the most propular metrics to monitor.  Let's visualize memory usage for the Opentelemetry Collector by viewing a graph of the `container_memory_rss` metric in the `monitoring` namespace.
 
 ```bash
-container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}
+container_memory_rss{namespace="monitoring", container="otel-collector"}
 ```
 
 ![Monitor OTel Collector memory](./images/otel-rss.png)
