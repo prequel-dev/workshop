@@ -1,11 +1,11 @@
 provider "helm" {
   kubernetes {
-    config_path = "~/.kubeconfig"
+    config_path = "~/.kube/config"
   }
 }
 
 provider "kubernetes" {
-  config_path = "~/.kubeconfig"
+  config_path = "~/.kube/config"
 }
 
 variable "prequel_provision_token" {

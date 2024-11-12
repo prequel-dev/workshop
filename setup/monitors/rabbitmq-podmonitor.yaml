@@ -4,7 +4,7 @@ metadata:
   name: rabbitmq
   namespace: rabbitmq
   labels:
-    release: kube-prometheus-stack
+    release: prometheus
 spec:
   selector:
     matchLabels:

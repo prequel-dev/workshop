@@ -4,7 +4,7 @@ metadata:
   name: strimzi-entity-operator-pods
   namespace: strimzi
   labels:
-    release: kube-prometheus-stack
+    release: prometheus
 spec:
   selector:
     matchLabels:
