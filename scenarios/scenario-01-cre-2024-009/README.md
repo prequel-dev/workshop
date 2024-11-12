@@ -23,7 +23,7 @@ Memory is one of the most propular metrics to monitor.  Let's visualize memory u
 container_memory_rss{namespace="monitoring", container="otel-collector"}
 ```
 
-![Monitor OTel Collector memory](./images/otel-rss.png)
+<img width="1434" alt="Screenshot 2024-11-12 at 3 42 29 PM" src="https://github.com/user-attachments/assets/91139f09-5599-487e-9adb-511737351cb6">
 
 The metric `container_memory_rss` measures the Resident Set Size (RSS), which is the amount of memory that a container has in RAM. Specifically, it shows the non-swapped physical memory used by the container, which is a critical indicator of how much memory the container is actively using from the available RAM. 
 
