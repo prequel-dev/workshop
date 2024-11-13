@@ -149,7 +149,7 @@ _Hints:_
 * Loss of data
 * A noisy neighbor could evict other services running on the node
 
-#### Question 3: How could we fix this problem?
+#### Question 4: How could we fix this problem?
 
 _Hints:_
 
