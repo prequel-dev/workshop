@@ -102,13 +102,13 @@ job.batch "traces-generator-job" deleted
 Trigger completed
 ```
 
-While the job is running, use Prometheus to monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric for the OpenTelemetry Collector container in the `monitoring` namespace to see how the Collector is doing. 
+While the job is running, use Prometheus to monitor the `container_memory_rss{namespace="monitoring", container="otel-collector"}` metric for the OpenTelemetry Collector container in the `monitoring` namespace to see how the Collector is doing. 
 
 #### Question 1: What do you see happening in Prometheus?
 
 _Hints:_
 
-Monitor the `container_memory_rss{namespace="monitoring", container="opentelemetry-collector"}` metric in Prometheus. Is it increasing?
+Monitor the `container_memory_rss{namespace="monitoring", container="otel-collector"}` metric in Prometheus. Is it increasing?
 
 Other metrics to explore:
 
@@ -117,7 +117,7 @@ container_oom_events_total{namespace="monitoring", image="docker.io/otel/opentel
 ```
 
 ```bash
-kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="opentelemetry-collector"}
+kube_pod_container_status_last_terminated_reason{namespace="monitoring", container="otel-collector"}
 ```
 
 #### Question 2: Why is it happening? What steps would you need to take to figure it out?
