@@ -40,9 +40,9 @@ You should already have an SSH session open to the workshop environment. In your
 Change directories to the relevant scenario folder:
 
 ```bash
-$ cd /home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
+$ cd /home/studentXX/workshop/scenarios/scenario-01-cre-2024-009
 $ pwd
-/home/student/prequel/workshop/scenarios/scenario-01-cre-2024-009
+/home/studentXX/workshop/scenarios/scenario-01-cre-2024-009
 ```
 
 Run the `trigger.sh` script to trigger the scenario problem. 
