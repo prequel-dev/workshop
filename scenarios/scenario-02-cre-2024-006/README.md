@@ -61,7 +61,7 @@ topic-00                                                                        
 
 ### Step 2: Monitor metrics for Kafka (1 minutes)
 
-Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.classroom.superorbital.io/ (change `XX` to your lab number found on your lab worksheet printout).
+Open a browser and load the Prometheus UI. The URL will be http://studentXX.detect.sh:9090. Change `XX` to your lab number found on your lab worksheet printout (e.g. 1, 2, ... 10).
 
 Use Prometheus to visualize the health of Kafka topic creation using the following metric:
 
