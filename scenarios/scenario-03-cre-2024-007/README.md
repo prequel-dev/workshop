@@ -60,6 +60,8 @@ $ pwd
 /home/studentXX/workshop/scenarios/scenario-03-cre-2024-007
 ```
 
+Change XX to your lab number found on your lab worksheet printout (e.g. 1, 2, ... 10).
+
 Run the `trigger.sh` script to trigger the scenario problem. 
 
 This script will create a Kubernetes job that generates messages and sends them to RabbitMQ. It takes a few minutes to complete.
