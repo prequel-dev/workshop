@@ -163,25 +163,25 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data.
 
-![RabbitMQ detection](./images/prequel-rabbitmq-detection.png)
+<img width="1414" alt="image" src="https://github.com/user-attachments/assets/6411a24e-b300-45f2-b314-b689bc02e229">
 
 #### Problem Explanation
 
 Look at the logs for the RabbitMQ container with the detection.
 
-![RabbitMQ logs](./images/rabbitmq-prequel-logs.png)
+<img width="1434" alt="image" src="https://github.com/user-attachments/assets/8c373d7e-9e0d-4208-9148-fe7d65c12cca">
 
 Note the discarded messages and warning that Mnesia is overloaded.
 
 Now look at the Kubernetes events on this cluster at the time of the problem.
 
-![RabbitMQ k8s](./images/rabbitmq-prequel-k8s.png)
+<img width="1439" alt="image" src="https://github.com/user-attachments/assets/74db8ca7-490e-43d3-b030-96cf6708ed2f">
 
-See the readiness probe failures for RabbitMQ.
+Note the BackoffLimitExceeded event due to too many readiness probe failures for RabbitMQ.
 
 Now look at the process data to view the CPU data for the container.
 
-![RabbitMQ cpu](./images/rabbitmq-prequel-cpu.png)
+<img width="1440" alt="image" src="https://github.com/user-attachments/assets/dd968fa9-bad4-4959-8f8f-1a7e06bf7e66">
 
 Note the elevated and flatlined CPU usage of 100m CPU. The resource limits for each pod is 200m CPU. The pod contains two containers. Both are maxed out at 100m CPU, indicating that the pod is starving for additional CPU resources.
 
