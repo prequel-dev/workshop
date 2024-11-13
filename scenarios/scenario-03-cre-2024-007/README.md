@@ -12,7 +12,7 @@ It's your job to make sure all elements of your application - including RabbitMQ
 
 ### Step 1: Monitor metrics for RabbitMQ (1 minutes)
 
-Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.classroom.superorbital.io/ (change `XX` to your lab number found on your lab worksheet printout).
+Open a browser and load the Prometheus UI. The URL will be http://studentXX.detect.sh:9090. Change `XX` to your lab number found on your lab worksheet printout (e.g. 1, 2, ... 10).
 
 Use Prometheus to visualize and explore RabbitMQ metrics. Let's start with:
 
