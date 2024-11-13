@@ -142,6 +142,13 @@ You should see a cgroup out of memory warning:
 default      101s        Warning   OOMKilling         node/gke-lab-default-pool-4fa5bdf0-v2jq   Memory cgroup out of memory: Killed process 1021235 (otelcol-k8s) total-vm:1553900kB, anon-rss:201972kB, file-rss:70040kB, shmem-rss:0kB, UID:10001 pgtables:784kB oom_score_adj:994
 ```
 
+#### Question 3: What are some risks this problem poses?
+
+_Hints:_ 
+
+* Loss of data
+* A noisy neighbor could evict other services running on the node
+
 #### Question 3: How could we fix this problem?
 
 _Hints:_
