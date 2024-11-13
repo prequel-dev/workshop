@@ -37,9 +37,9 @@ Let's get started!
 Change directories to the scenario folder:
     
 ```bash
-$ cd /home/student/prequel/workshop/scenarios/scenario-02-cre-2024-006
+$ cd /home/studentXX/workshop/scenarios/scenario-02-cre-2024-006
 $ pwd
-/home/student/prequel/workshop/scenarios/scenario-02-cre-2024-006
+/home/studentXX/workshop/scenarios/scenario-02-cre-2024-006
 ```
 
 Add a new topic by applying the `topic-00.yaml` configuration file. 
