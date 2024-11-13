@@ -55,9 +55,9 @@ Now let's recreate the problem associated with CRE-2024-007. This will take abou
 Change directories to the relevant scenario folder:
 
 ```bash
-$ cd /home/student/prequel/workshop/scenarios/scenario-03-cre-2024-007/
+$ cd /home/studentXX/workshop/scenarios/scenario-03-cre-2024-007/
 $ pwd
-/home/student/prequel/workshop/scenarios/scenario-03-cre-2024-007
+/home/studentXX/workshop/scenarios/scenario-03-cre-2024-007
 ```
 
 Run the `trigger.sh` script to trigger the scenario problem. 
