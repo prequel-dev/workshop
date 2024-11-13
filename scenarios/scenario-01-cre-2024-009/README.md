@@ -45,6 +45,8 @@ $ pwd
 /home/studentXX/workshop/scenarios/scenario-01-cre-2024-009
 ```
 
+Change XX to your lab number found on your lab worksheet printout (e.g. 1, 2, ... 10).
+
 Run the `trigger.sh` script to trigger the scenario problem. 
 
 This script will create a Kubernetes job that generates Jaeger traces and sends them to the OpenTelemetry Collector. It takes a few minutes to complete.
