@@ -15,7 +15,7 @@ This exercise will introduce you to monitoring the OpenTelemetry Collector. You 
 
 ### Step 1: Monitor metrics for the OpenTelemetry Collector (1 minute)
 
-Open a browser and load the Prometheus UI. The URL will be http://prometheusXX.classroom.superorbital.io/ (change `XX` to your lab number found on your lab worksheet printout).
+Open a browser and load the Prometheus UI. The URL will be http://studentXX.detect.sh:9090. Change `XX` to your lab number found on your lab worksheet printout (e.g. 1, 2, ... 10).
 
 Memory is one of the most propular metrics to monitor.  Let's visualize memory usage for the Opentelemetry Collector by viewing a graph of the `container_memory_rss` metric in the `monitoring` namespace.
 
