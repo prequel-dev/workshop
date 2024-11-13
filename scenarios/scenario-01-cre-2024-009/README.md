@@ -153,7 +153,7 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data and graph.
 
-![Prequel OTel Detection](.images/prequel-otel-detection.png)
+<img width="1435" alt="image" src="https://github.com/user-attachments/assets/b931baf1-a04a-4722-b60c-7c0f8c8e55af">
 
 Prequel has already done the heavy-lifting. Detecting the issue and stitching together relevant context.  
 
@@ -170,21 +170,21 @@ Click on How To Mitigate -> Details. Does the rule help explain the problem and 
 
 Note the following log lines in the OpenTelemetry Collector:
 
-![Prequel OTel Logs](./images/otel-prequel-logs.png)
+<img width="1435" alt="image" src="https://github.com/user-attachments/assets/e1c6575f-44ea-4281-b62a-c7e6bc4601dd">
 
 The OpenTelemetry Collector receives traces from your cluster and forwards it on to a destination source, such as Prometheus. The logs above indicate that the collector is unable to forward the data it is receiving. 
 
-![Prequel OTel memory](./images/otel-prequel-memory.png)
+<img width="1438" alt="image" src="https://github.com/user-attachments/assets/dd318074-d9a2-40d4-8fc4-6bcb5747f98f">
 
 This data builds up in the collector's memory, eventually consuming more than its resource limit. 
 
-![Prequel OTel K8s Events](./images/otel-prequel-k8s.png)
+<img width="1439" alt="image" src="https://github.com/user-attachments/assets/59cfb93b-e955-49d7-83ef-c0974088fe56">
 
 When this resource limit is exceeded, the container is terminated by Linux. This container status event shows up in Kuberetes as an `OOMKilling` event.
 
-![Prequel OTel Graph](./images/otel-prequel-graph.png)
+<img width="1436" alt="image" src="https://github.com/user-attachments/assets/6b502f54-29a9-4b30-a53f-16d16e62f7b9">
 
-The graph shows us where the trace data is coming from.
+The Prequel Graph collects relevant data from neighboring services to help us understand where the trace data is coming from.
 
 #### Common Reliability Enumeration (CRE) 2024-009
 
