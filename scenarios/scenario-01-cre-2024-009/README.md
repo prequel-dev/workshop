@@ -155,11 +155,11 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data and graph.
 
-<img width="1435" alt="image" src="https://github.com/user-attachments/assets/b931baf1-a04a-4722-b60c-7c0f8c8e55af">
+<img width="1427" alt="image" src="https://github.com/user-attachments/assets/6ac5240e-c506-4f03-a273-7cbb2bc20639">
 
 Prequel has already done the heavy-lifting. Detecting the issue and stitching together relevant context.  
 
-* Look at the otel-collector Logs in the detection. Do you see the same errors? 
+* Look at the `otel-collector` Logs in the detection. Do you see the same errors? 
 * Change the data source filter to 'process' to view process CPU and memory. 
 * Look at HTTP data. And look at Kubernetes events.
 * View the Graph in the detection. Where are the traces coming from?
