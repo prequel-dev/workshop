@@ -42,6 +42,8 @@ $ pwd
 /home/studentXX/workshop/scenarios/scenario-02-cre-2024-006
 ```
 
+Change XX to your lab number found on your lab worksheet printout (e.g. 1, 2, ... 10).
+
 Add a new topic by applying the `topic-00.yaml` configuration file. 
 
 ```bash
