@@ -160,7 +160,7 @@ Go to https://app-beta.prequel.dev and log in using your credentials. The creden
 
 Click on the most recent detection and explore the detection data.
 
-![Kafka Detection](./images/prequel-kafka-detection.png)
+<img width="1418" alt="image" src="https://github.com/user-attachments/assets/54191195-0666-4565-af6e-f266e32d0566">
 
 * Look at the topic-operator logs in the detection. Do you see the same errors?
 * Looks at the K8s events. 
@@ -169,7 +169,7 @@ Click on the most recent detection and explore the detection data.
 
 Note the following details in the `topic-operator` in the Kafka `entity-operator`:
 
-![Kafka Topic Operator logs](./images/kafka-prequel-logs.png)
+<img width="1427" alt="image" src="https://github.com/user-attachments/assets/5aa548ae-5c0b-4bbd-b989-3ee21dd7ef47">
 
 The detection identifies that the main event loop is blocked. 
 
