@@ -35,7 +35,7 @@ resource "helm_release" "rabbitmq_operator" {
   name       = "my-rabbitmq"
   namespace  = "rabbitmq"
   create_namespace = true
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "rabbitmq-cluster-operator"
 }
 
