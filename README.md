@@ -1,4 +1,4 @@
-# Workshop
+# Problem Detection Workshop
 
 ## Overview
 
