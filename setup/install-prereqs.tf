@@ -8,16 +8,6 @@ provider "kubernetes" {
   config_path = "~/.kube/config"
 }
 
-variable "prequel_provision_token" {
-  description = "Prequel provision token"
-  type        = string
-}
-
-variable "prequel_cluster_name" {
-  description = "Prequel cluster name"
-  type        = string
-}
-
 ### Strimzi Kafka Cluster Operator
 
 resource "helm_release" "kafka_operator" {
@@ -37,25 +27,4 @@ resource "helm_release" "rabbitmq_operator" {
   create_namespace = true
   repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "rabbitmq-cluster-operator"
-}
-
-### Prequel
-
-resource "helm_release" "prequel" {
-  name       = "prequel-latest"
-  namespace  = "prequel"
-  create_namespace = true
-  repository = "https://prequel-dev.github.io/helm"
-  chart      = "prequel-collector"
-  wait = false
-
-  set {
-    name = "api.token"
-    value = var.prequel_provision_token
-  }
-
-  set {
-    name = "api.clusterName"
-    value = var.prequel_cluster_name
-  }
 }
