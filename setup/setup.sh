@@ -4,10 +4,11 @@ set -x
 
 NUM_USERS=$1
 BASTION=$2
+USER_PREFIX=$3
 
 function tarball() {
   local TARBALL=$1
-  DATE=$(date --rfc-3339=date)
+  DATE=$(date "+%Y-%m-%dT%H:%M:%S%z")
 
   pushd ../../
   tar -czvf /tmp/workshop-$DATE.tgz \
@@ -26,8 +27,9 @@ function tarball() {
 function doinstall() {
   local USER_NUM=$1
   local OUT=$2
+ 
 
-  USER="student$USER_NUM"
+  USER="$USER_PREFIX$USER_NUM"
   scp $OUT $USER@$BASTION:workshop.tgz
   ssh $USER@$BASTION "tar -zxvf workshop.tgz"
   ssh -t $USER@$BASTION "bash -ic 'helm repo add strimzi https://strimzi.io/charts'"
@@ -51,7 +53,7 @@ function install() {
 }
 
 function main() {
-  DATE=$(date --rfc-3339=date)
+  DATE=$(date "+%Y-%m-%dT%H:%M:%S%z")
   OUT=/tmp/workshop-$DATE.tgz
   tarball $OUT
   install $OUT
